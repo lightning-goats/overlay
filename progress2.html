@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>js overlay</title>
+    <style>
+        #container {
+            position: absolute;
+            width: 1280px;
+            height: 720px;
+            margin: auto;
+            top: 0;
+            left: 0;
+        }
+        #qr-code {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: white;
+            width: 125px;
+            height: 125px;
+            border-top-left-radius: 12px;  /* Rounded corners */
+            border-top-right-radius: 12px;  /* Rounded corners */
+            z-index: 3;
+        }
+         #sats_left {
+            position: absolute;
+            top: 118px;
+            right: 0;
+            width: 125px;
+            text-align: center;
+            font-size: 14px;  /* Font size set to 14px */
+            font-weight: bold;  /* Font weight set to bold */
+            font-family: 'Arial', sans-serif;  /* Font family set to sans-serif */
+            background-color: white;
+            border-bottom-left-radius: 12px;  /* Rounded bottom-left corner */
+            border-bottom-right-radius: 12px;  /* Rounded bottom-right corner */
+            z-index: 3;
+        }
+        #content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+        #progress-container {
+    		width: 1260px;  /* Set width */
+    		height: 15px;
+    		background-color: #ccc;
+    		border-radius: 7px;  /* Rounded corners */
+    		margin: auto;  /* Automatically distribute margins */
+    		position: relative;  /* Relative positioning */
+    		left: 0;  /* Left set to 0 */
+    		right: 0;  /* Right set to 0 */
+		bottom: 10px;
+	}
+        #progress-fill {
+            height: 100%;
+            background-color: #e6b800;
+            border-radius: 7px;  /* Rounded corners */
+        }
+        p {
+            font-size: 18px;
+        }
+        #goal-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #e6b800;
+    padding: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    border: 2px solid black;
+    border-radius: 12px;
+}
+
+.scrolling-comment {
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFF;  /* White text */
+    background-color: rgba(0, 0, 0, 0.8);  /* Semi-transparent black background */
+    padding: 5px;  /* Padding around the text */
+    border-radius: 5px;  /* Rounded corners for the background */
+    transition: opacity 4s ease, transform 4s ease; /* 4s duration for both opacity and transform */
+    opacity: 1; /* Fully visible initially */
+    position: absolute;  /* Make it absolute to position it accurately */
+    bottom: 0;  /* Start at the bottom */
+    right: 0;  /* Align with the right edge */
+    z-index: 3;
+}
+
+#comment-container {
+    position: absolute;
+    bottom: 40px; /* Adjust this value */
+    right: 0;
+    width: 300px;
+    height: 550px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#progress-text {
+    position: absolute;
+    top: 0;  /* align with the top of the progress-container */
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 15px;  /* same as the height of the progress-container */
+    color: #000;  /* or any color that makes it visible on the progress bar */
+    z-index: 2;  /* higher z-index so it appears above the progress-fill */
+}
+
+#goal-achieved-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e6b800;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+#feeder-triggered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: bold;
+    color: #FFF;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    border-radius: 12px;
+    z-index: 2;
+}
+    </style>
+</head>
+<body>
+
+<div id="container">
+<div id="goal-achieved-layer" style="display: none;"></div>
+<div id="feeder-triggered" style="display: none;">Feeder Triggered</div>
+    <div id="qr-code">
+        <img src="https://lnb.bolverker.com/api/v1/qrcode/LNURL1DP68GURN8GHJ7MRWVGHXYMMVWEJHY6M9WGHXXMMD9AKXUATJD3CZ74TEVUE557SYLAU9E" width='125' height='125' style="border-radius: 12px;">
+        <img id="lightning-img" src="./images/lightning.png" width='125' height='125' style="border-radius: 12px; display: none;">
+    </div>
+    <div id="sats_left"></div>
+    <div id="content">
+      <div id="comment-container"></div>
+
+        <div id="progress-container">
+            <div id="progress-fill"></div>
+            <div id="progress-text"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let balance = 0;
+    let goal = 0;
+    let goalDollars = 5;
+    let goalAchieved = false;
+    let ws;
+    const WS_URL = `wss://lnb.bolverker.com/api/v1/ws/ab00773393ed4e5eb3b41bf8c4f87cc8`;
+    let reconnectInterval = 5000;
+    
+function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
+    const satsLeftElem = document.getElementById('sats_left');
+    if (toggle) {
+        satsLeftElem.innerText = `${receivedAmount} sats received`;
+    } else {
+        if (currentSatsLeft > 0) {
+            satsLeftElem.innerText = `${currentSatsLeft} sats to go`;
+        }
+        // Do nothing if currentSatsLeft is 0 or negative
+    }
+}
+
+    // Initialize WebSocket
+    function initWebSocket() {
+        ws = new WebSocket(WS_URL);
+
+        ws.addEventListener('open', function() {
+            console.log("WebSocket is open now.");
+        });
+
+        ws.addEventListener('close', function() {
+            console.log("WebSocket is closed now.");
+            setTimeout(initWebSocket, reconnectInterval);
+        });
+
+        ws.addEventListener('error', function(error) {
+            console.log("WebSocket Error: " + error);
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+        });
+
+    ws.addEventListener('message', function(event) {
+        const data = JSON.parse(event.data);
+
+	if (data.payment.checking_id && data.payment.checking_id.startsWith("internal")) {
+	    setTimeout(() => {
+		updateProgressBar();
+		updateSatsLeftText();
+	    }, 1500); // 1000 milliseconds = 1 second
+    return;
+}
+
+        if (data.wallet_balance !== undefined) {
+        // Update the balance with the value received through WebSocket
+        balance = data.wallet_balance; // Assuming balance is in sats
+
+        // Rest of the code remains the same
+        const receivedAmount = data.payment.amount / 1000;
+        const currentSatsLeft = goal - balance;
+        
+        updateSatsLeftElem(receivedAmount, currentSatsLeft, true);
+
+        // Toggle the QR code to lightning image
+        const qrCode = document.querySelector('#qr-code img:first-child');
+        const lightningImg = document.getElementById('lightning-img');
+        qrCode.style.display = 'none';
+        lightningImg.style.display = 'block';
+
+        updateProgressBar();
+
+        setTimeout(function() {
+            updateSatsLeftElem(receivedAmount, currentSatsLeft, false);
+            qrCode.style.display = 'block';
+            lightningImg.style.display = 'none';
+        }, 3000);
+    }
+        
+if (data.payment.extra.comment !== undefined) {
+    const commentText = data.payment.extra.comment;
+    const commentDiv = document.createElement('div');
+    commentDiv.className = 'scrolling-comment';
+    commentDiv.innerText = commentText;
+    const container = document.getElementById('comment-container');
+    
+    // Position comment at the bottom of the container
+    commentDiv.style.bottom = '0px';
+    
+    container.appendChild(commentDiv);
+
+    // Start the fade-out and scroll-up after 4 seconds
+    setTimeout(() => {
+        commentDiv.style.opacity = '0';
+        commentDiv.style.transform = `translateY(-${container.offsetHeight}px)`;  // Move it up off the screen
+    }, 4000);  // Starting the animation after 4 seconds
+
+    // Remove the comment from the DOM after the animation is done
+    setTimeout(() => {
+        container.removeChild(commentDiv);
+    }, 15000);  // Remove after 7 seconds for fade-out + 7 seconds for removal
+}
+
+});
+
+}
+  
+	document.addEventListener('DOMContentLoaded', function() {
+    // Fetch both goal and balance, then update progress bar
+    Promise.all([fetchGoal(goalDollars), fetchBalance()])
+        .then(() => {
+            updateProgressBar();
+            updateSatsLeftText();
+            })
+        .catch(error => {
+            console.log("An error occurred:", error);
+        });
+
+    initWebSocket();
+});
+    function fetchGoal(amount) {
+        return new Promise((resolve, reject) => {
+            fetch(`https://lightning-goats.com/convert/${amount}`)
+                .then(response => response.json())
+                .then(data => {
+                    const newGoal = parseFloat(data);
+                    if (!isNaN(newGoal)) {
+                        goal = newGoal;
+                        resolve();
+                    } else {
+                        console.log("Invalid goal received: " + data);
+                        reject(new Error("Invalid goal received"));
+                    }
+                })
+                .catch(error => {
+                    console.log("Failed to fetch goal.", error);
+                    reject(new Error("Failed to fetch goal"));
+                });
+        });
+    }
+
+    function fetchBalance() {
+        return new Promise((resolve, reject) => {
+            fetch("https://lightning-goats.com/balance")
+                .then(response => response.text())
+                .then(data => {
+                    const newBalance = parseFloat(data);
+                    if (!isNaN(newBalance)) {
+                        balance = newBalance / 1000;
+                        resolve();
+                    } else {
+                        console.log("Invalid balance received: " + data);
+                        reject(new Error("Invalid balance received"));
+                    }
+                })
+                .catch(error => {
+                    console.log("Failed to fetch balance.", error);
+                    reject(new Error("Failed to fetch balance"));
+                });
+        });
+    }
+    
+    function updateSatsLeftText() {
+    const satsLeft = Math.round(Math.max(goal - balance, 0));
+    document.getElementById('sats_left').innerText = `${satsLeft} sats to go`;
+}
+
+function updateProgressBar() {
+    if (goal === 0) {
+        console.log('Goal is zero, cannot calculate progress.');
+        return;
+    }
+
+    const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
+    document.getElementById('progress-fill').style.width = `${progress}%`;
+    document.getElementById('progress-text').innerText = `${Math.round(progress)}%`;
+
+    // Check if goal is achieved
+    if (progress >= 100 && !goalAchieved) {
+        goalAchieved = true;  // Set the flag to true
+
+        // Show the goal-achieved-layer and "Feeder Triggered"
+        document.getElementById('goal-achieved-layer').style.display = 'block';
+        document.getElementById('feeder-triggered').style.display = 'block';
+
+        // Toggle back after 1 second
+        setTimeout(() => {
+            document.getElementById('goal-achieved-layer').style.display = 'none';
+            document.getElementById('feeder-triggered').style.display = 'none';
+            goalAchieved = false;  // Reset the flag
+        }, 1000);
+
+        // Reset balance to 0
+        balance = 0;
+    }
+}
+
+</script>
+
+</body>
+</html>
