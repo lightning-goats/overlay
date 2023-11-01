@@ -22,12 +22,6 @@ This is an HTML overlay designed to be used with OBS Studio for the Lightning Go
 2. In OBS Studio, add a new "Browser" source and point it to the local HTML file.
 3. Customize the overlay dimensions to match your OBS Studio canvas (1280x720 is the default).
 
-## File Structure
-
-- **index.html**: Main HTML file containing the structure of the overlay.
-- **styles.css** (embedded in HTML): Contains the styling for the overlay.
-- **script.js** (embedded in HTML): Contains the JavaScript logic for real-time updates and interactions.
-
 ### Main Components
 
 #### QR Code and Sats Left
