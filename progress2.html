@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -138,6 +137,7 @@
     z-index: 2;
 }
     </style>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -146,7 +146,7 @@
 <div id="feeder-triggered" style="display: none;">Feeder Triggered</div>
     <div id="qr-code">
         <img src="https://lnb.bolverker.com/api/v1/qrcode/LNURL1DP68GURN8GHJ7MRWVGHXYMMVWEJHY6M9WGHXXMMD9AKXUATJD3CZ7M240PGHGMCN94Q2E" width='125' height='125' style="border-radius: 12px;">
-        <img id="lightning-img" src="./images/lightning.png" width='125' height='125' style="border-radius: 12px; display: none;">
+        <img id="lightning-img" src="./images/lightninggoatslogo1.png" width='125' height='125' style="border-radius: 12px; display: none;">
     </div>
     <div id="sats_left"></div>
     <div id="content">
@@ -162,11 +162,10 @@
 <script>
     let balance = 0;
     let goal = 0;
-    let goalDollars = 5;
     let goalAchieved = false;
     let ws;
     const WS_URL = `wss://lnb.bolverker.com/api/v1/ws/ab00773393ed4e5eb3b41bf8c4f87cc8`;
-    let reconnectInterval = 5000;
+    let reconnectInterval = 30000;
     
 function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
     const satsLeftElem = document.getElementById('sats_left');
@@ -178,6 +177,17 @@ function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
         }
         // Do nothing if currentSatsLeft is 0 or negative
     }
+}
+
+  function periodicallyUpdate() {
+    Promise.all([fetchBalance(), fetchGoal(goalDollars)])
+        .then(() => {
+            updateSatsLeftText();  // Update the "sats left" text
+            updateProgressBar();   // Update the progress bar and check the goal
+        })
+        .catch(error => {
+            console.log("Error updating sats left and goal: ", error);
+        });
 }
 
     // Initialize WebSocket
@@ -213,9 +223,9 @@ function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
 
         if (data.wallet_balance !== undefined) {
         // Update the balance with the value received through WebSocket
-        balance = data.wallet_balance; // Assuming balance is in sats
+        balance = data.wallet_balance;
 
-        // Rest of the code remains the same
+        
         const receivedAmount = data.payment.amount / 1000;
         const currentSatsLeft = goal - balance;
         
@@ -252,51 +262,55 @@ if (data.payment.extra.comment !== undefined) {
     setTimeout(() => {
         commentDiv.style.opacity = '0';
         commentDiv.style.transform = `translateY(-${container.offsetHeight}px)`;  // Move it up off the screen
-    }, 4000);  // Starting the animation after 4 seconds
+    }, 5000);  // Starting the animation after 4 seconds
 
     // Remove the comment from the DOM after the animation is done
     setTimeout(() => {
         container.removeChild(commentDiv);
-    }, 15000);  // Remove after 7 seconds for fade-out + 7 seconds for removal
+    }, 18000);  // Remove after 9 seconds for fade-out + 9 seconds for removal
 }
 
 });
 
 }
   
-	document.addEventListener('DOMContentLoaded', function() {
-    // Fetch both goal and balance, then update progress bar
-    Promise.all([fetchGoal(goalDollars), fetchBalance()])
-        .then(() => {
-            updateProgressBar();
-            updateSatsLeftText();
+document.addEventListener('DOMContentLoaded', function() {
+        // Fetch both goal and balance, then update the progress bar
+        Promise.all([fetchGoal(goalDollars), fetchBalance()])
+            .then(() => {
+                updateProgressBar();
+                updateSatsLeftText();
             })
-        .catch(error => {
-            console.log("An error occurred:", error);
-        });
+            .catch(error => {
+                console.log("An error occurred:", error);
+            });
 
+        // Initialize WebSocket
     initWebSocket();
+    const updateInterval =60000;
+    setInterval(periodicallyUpdate, updateInterval);
 });
-    function fetchGoal(amount) {
-        return new Promise((resolve, reject) => {
-            fetch(`https://lightning-goats.com/convert/${amount}`)
-                .then(response => response.json())
-                .then(data => {
-                    const newGoal = parseFloat(data);
-                    if (!isNaN(newGoal)) {
-                        goal = newGoal;
-                        resolve();
-                    } else {
-                        console.log("Invalid goal received: " + data);
-                        reject(new Error("Invalid goal received"));
-                    }
-                })
-                .catch(error => {
-                    console.log("Failed to fetch goal.", error);
-                    reject(new Error("Failed to fetch goal"));
-                });
-        });
-    }
+  
+function fetchGoal() {
+    return new Promise((resolve, reject) => {
+        fetch("https://lightning-goats.com/trigger_amount")
+            .then(response => response.json())
+            .then(data => {
+                const newGoal = parseFloat(data.trigger_amount);
+                if (!isNaN(newGoal)) {
+                    goal = newGoal;
+                    resolve();
+                } else {
+                    console.log("Invalid trigger amount received: " + data);
+                    reject(new Error("Invalid trigger amount received"));
+                }
+            })
+            .catch(error => {
+                console.log("Failed to fetch trigger amount.", error);
+                reject(new Error("Failed to fetch trigger amount"));
+            });
+    });
+}
 
     function fetchBalance() {
         return new Promise((resolve, reject) => {
@@ -358,3 +372,4 @@ function updateProgressBar() {
 
 </body>
 </html>
+
