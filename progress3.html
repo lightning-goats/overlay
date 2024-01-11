@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>js overlay</title>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:," type="image/x-icon">
+    <style>
+        #container {
+            position: absolute;
+            width: 1280px;
+            height: 720px;
+            margin: auto;
+            top: 0;
+            left: 0;
+        }
+        #qr-code {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: white;
+            width: 120px;
+            height: 120px;
+            border-top-left-radius: 12px;  /* Rounded corners */
+            border-top-right-radius: 12px;  /* Rounded corners */
+            z-index: 3;
+        }
+         #sats_left {
+            position: absolute;
+            top: 117px;
+            right: 0;
+            width: 120px;
+	    padding-bottom: 6px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif; 
+            background-color: white;
+            border-bottom-left-radius: 12px; 
+            border-bottom-right-radius: 12px;
+            z-index: 3;
+        }
+        #content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+        #progress-container {
+    		width: 1260px;  /* Set width */
+    		height: 11px;
+    		background-color: #ccc;
+    		border-radius: 7px;  /* Rounded corners */
+    		margin: auto;  /* Automatically distribute margins */
+    		position: relative;  /* Relative positioning */
+    		left: 0;  /* Left set to 0 */
+    		right: 0;  /* Right set to 0 */
+		bottom: 0px;
+		z-index: 2;
+	}
+        #progress-fill {
+            height: 100%;
+            background-color: #e6b800;
+            border-radius: 7px;
+        }
+        p {
+            font-size: 18px;
+        }
+        #goal-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #e6b800;
+    padding: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    border: 2px solid black;
+    border-radius: 12px;
+}
+
+.scrolling-comment {
+    font-size: 12px;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    color: #FFF;
+    padding: 2px; /* Padding around the text */
+    position: absolute;
+    white-space: nowrap; /* Prevents text from wrapping */
+    bottom: 0px; /* Adjust as needed to position at the bottom of the bottom-container */
+    right: 0; /* Start offscreen to the right */
+    z-index: 1;
+}
+
+
+
+#progress-text {
+    position: absolute;
+    top: 0;  /* align with the top of the progress-container */
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    line-height: 11px;  /* same as the height of the progress-container */
+    color: #000;  /* or any color that makes it visible on the progress bar */
+    z-index: 2;  /* higher z-index so it appears above the progress-fill */
+}
+
+#goal-achieved-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e6b800;
+    opacity: 0.6;
+    z-index: 1;
+}
+
+#feeder-triggered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: bold;
+    font-family: 'Arial', sans-serif;
+    color: #FFF;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    border-radius: 12px;
+    z-index: 2;
+}
+
+#time-temperature-container {
+    position: absolute;
+    bottom: 0px; /* Adjust to position below the progress bar */
+    left: 0px;
+    display: flex; /* Use flexbox to align items in a row */
+    align-items: center; /* Center items vertically */
+    color: white;
+    background-color: #e33502;
+    border-radius: 7px;
+    padding: 2px;
+    padding-left: 14px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Arial', sans-serif;
+    z-index: 2;
+}
+
+#current-time, #current-temperature {
+    margin-right: 10px; /* Spacing between time and temperature */
+}
+
+#bottom-container {
+    background-color: #e33502;
+    border-radius: 7px;
+    padding: 4px; /* Padding inside the container */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    height: 26px;
+    width: 1280px;
+    z-index: 0;
+}
+
+
+    </style>
+</head>
+<body>
+
+<div id="container">
+<div id="goal-achieved-layer" style="display: none;"></div>
+<div id="feeder-triggered" style="display: none;">Feeder Triggered</div>
+    <div id="qr-code">
+        <img src="https://lnb.bolverker.com/api/v1/qrcode/LNURL1DP68GURN8GHJ7MRWVGHXYMMVWEJHY6M9WGHXXMMD9AKXUATJD3CZ7M240PGHGMCN94Q2E" width='120' height='120' style="border-radius: 12px;">
+        <img id="lightning-img" src="./images/lightninggoatslogo1.png" width='125' height='125' style="border-radius: 12px; display: none;">
+    </div>
+    <div id="sats_left"></div>
+    <div id="content">
+    <div id="bottom-container">
+        <div id="progress-container">
+            <div id="progress-fill"></div>
+            <div id="progress-text"></div>
+        </div>
+        <div id="time-temperature-container">
+            <div id="current-time"></div>
+            <div id="current-temperature"></div>
+        </div>
+        <div id="scrolling-comment"></div>
+    </div>    
+    </div>
+</div>
+
+<script>
+    let balance = 0;
+    let goal = 0;
+    let goalAchieved = false;
+    let ws;
+    const WS_URL = `wss://lnb.bolverker.com/api/v1/ws/ab00773393ed4e5eb3b41bf8c4f87cc8`;
+    let reconnectInterval = 30000;
+    let messageQueue = [];
+    let isScrolling = false;
+
+
+ function fetchConversionRate() {
+    return fetch('https://lightning-goats.com/convert/0.01')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .catch(error => {
+            throw error; // Propagate error to be handled where the function is called
+        });
+}
+
+  function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
+    const satsLeftElem = document.getElementById('sats_left');
+    if (toggle) {
+        satsLeftElem.innerText = `${receivedAmount} sats received`;
+    } else {
+        if (currentSatsLeft > 0) {
+            satsLeftElem.innerText = `${currentSatsLeft} sats to go`;
+        }
+        // Do nothing if currentSatsLeft is 0 or negative
+    }
+}
+
+function fetchAndDisplayMessages(info = false) {
+    let url = "https://lightning-goats.com/messages";
+    if (info === true) {
+        url += "/info";
+    }
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data)) {
+                data.forEach(message => {
+                    addMessageToQueue(message.content);
+                });
+
+                displayNextMessage();
+            } else {
+                console.log("Unexpected data format received:", data);
+            }
+        })
+        .catch(error => {
+            console.log("Error fetching messages: ", error);
+        });
+}
+
+function addMessageToQueue(messageText) {
+    messageQueue.push(messageText);
+    if (!isScrolling) {
+        displayNextMessage();
+    }
+}
+
+function resetAllMessages() {
+  return fetch('https://lightning-goats.com/messages/reset')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .catch(error => {
+            throw error; // Propagate error to be handled where the function is called
+        });
+
+}
+
+  function periodicallyUpdate() {
+    Promise.all([fetchBalance(), fetchGoal()])
+        .then(() => {
+            updateSatsLeftText();  // Update the "sats left" text
+            updateProgressBar();   // Update the progress bar and check the goal
+             
+            if (Math.random() < 0.33) {  // 0.1 is 1/10, representing a 10% chance
+                fetchAndDisplayMessages(true);
+            }
+        })
+        .catch(error => {
+            console.log("Error updating sats left and goal: ", error);
+        });
+}
+
+  // Initialize WebSocket
+  function initW
