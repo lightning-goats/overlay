@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>js overlay</title>
     <meta charset="UTF-8">
     <link rel="icon" href="data:," type="image/x-icon">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
     <style>
+        /* Existing CSS */
         #container {
             position: absolute;
             width: 1280px;
@@ -14,565 +16,789 @@
             top: 0;
             left: 0;
         }
+
         #qr-code {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: 2px;
+            right: 5px;
             background-color: white;
             width: 120px;
             height: 120px;
-            border-top-left-radius: 12px;  /* Rounded corners */
-            border-top-right-radius: 12px;  /* Rounded corners */
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
             z-index: 3;
         }
-         #sats_left {
+
+        #sats_left {
             position: absolute;
-            top: 117px;
-            right: 0;
+            top: 121px;
+            right: 5px;
             width: 120px;
-	    padding-bottom: 6px;
+            padding-bottom: 3px;
             text-align: center;
             font-size: 12px;
             font-weight: bold;
-            font-family: 'Arial', sans-serif; 
+            font-family: 'Arial', sans-serif;
             background-color: white;
-            border-bottom-left-radius: 12px; 
+            border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
             z-index: 3;
         }
+
         #content {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
         }
+
         #progress-container {
-    		width: 1260px;  /* Set width */
-    		height: 11px;
-    		background-color: #ccc;
-    		border-radius: 7px;  /* Rounded corners */
-    		margin: auto;  /* Automatically distribute margins */
-    		position: relative;  /* Relative positioning */
-    		left: 0;  /* Left set to 0 */
-    		right: 0;  /* Right set to 0 */
-		bottom: 0px;
-		z-index: 2;
-	}
+            width: 98%;
+            height: 11px;
+            background-color: #ccc;
+            border-radius: 7px;
+            position: relative;
+            margin: 0 auto;
+            z-index: 2;
+        }
+
         #progress-fill {
             height: 100%;
             background-color: #e6b800;
             border-radius: 7px;
+            width: 0%;
+            /* Ensure initial width is 0 */
         }
+
         p {
             font-size: 18px;
         }
+
         #goal-banner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #e6b800;
-    padding: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    border: 2px solid black;
-    border-radius: 12px;
-}
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #e6b800;
+            padding: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid black;
+            border-radius: 12px;
+        }
 
-.scrolling-comment {
-    font-size: 12px;
-    font-family: 'Arial', sans-serif;
-    font-weight: bold;
-    color: #FFF;
-    padding: 2px; /* Padding around the text */
-    position: absolute;
-    white-space: nowrap; /* Prevents text from wrapping */
-    bottom: 0px; /* Adjust as needed to position at the bottom of the bottom-container */
-    right: 0; /* Start offscreen to the right */
-    z-index: 1;
-}
+        .scrolling-comment {
+            font-size: 12px;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            color: #FFF;
+            padding: 2px;
+            position: absolute;
+            white-space: nowrap;
+            bottom: 0px;
+            right: 0;
+            z-index: 1;
+        }
 
+        #progress-text {
+            position: absolute;
+            top: 0px;
+            /* Adjusted to be above the progress bar */
+            width: 100%;
+            text-align: center;
+            font-size: 9px;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            line-height: 11px;
+            color: #000;
+            z-index: 3;
+        }
 
+        #goal-achieved-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #e6b800;
+            opacity: 0.6;
+            z-index: 1;
+        }
 
-#progress-text {
-    position: absolute;
-    top: 0;  /* align with the top of the progress-container */
-    width: 100%;
-    text-align: center;
-    font-size: 9px;
-    font-family: 'Arial', sans-serif;
-    font-weight: bold;
-    line-height: 11px;  /* same as the height of the progress-container */
-    color: #000;  /* or any color that makes it visible on the progress bar */
-    z-index: 2;  /* higher z-index so it appears above the progress-fill */
-}
+        #feeder-triggered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+            color: #FFF;
+            padding: 10px;
+            border-radius: 12px;
+            z-index: 2;
+        }
 
-#goal-achieved-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #e6b800;
-    opacity: 0.6;
-    z-index: 1;
-}
+        #time-temperature-container {
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            display: block;
+            align-items: center;
+            color: white;
+            background-color: #e33502;
+            border-radius: 7px;
+            padding: 2px;
+            padding-left: 14px;
+            padding-right: 14px;
+            /* Added padding to the right */
+            font-size: 12px;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+            z-index: 2;
+        }
 
-#feeder-triggered {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 32px;
-    font-weight: bold;
-    font-family: 'Arial', sans-serif;
-    color: #FFF;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 10px;
-    border-radius: 12px;
-    z-index: 2;
-}
+        #current-time,
+        #current-temperature {
+            display: inline-block;
+            margin-right: 10px;
+        }
 
-#time-temperature-container {
-    position: absolute;
-    bottom: 0px; /* Adjust to position below the progress bar */
-    left: 0px;
-    display: flex; /* Use flexbox to align items in a row */
-    align-items: center; /* Center items vertically */
-    color: white;
-    background-color: #e33502;
-    border-radius: 7px;
-    padding: 2px;
-    padding-left: 14px;
-    font-size: 12px;
-    font-weight: bold;
-    font-family: 'Arial', sans-serif;
-    z-index: 2;
-}
+        #bottom-container {
+            background-color: #e33502;
+            padding: 6px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            margin: auto;
+            height: 26px;
+            width: 100%;
+            z-index: 0;
+        }
 
-#current-time, #current-temperature {
-    margin-right: 10px; /* Spacing between time and temperature */
-}
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
 
-#bottom-container {
-    background-color: #e33502;
-    border-radius: 7px;
-    padding: 4px; /* Padding inside the container */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    margin: auto;
-    height: 26px;
-    width: 1280px;
-    z-index: 0;
-}
+            100% {
+                transform: translateX(calc(-100% - 1280px));
+            }
+        }
 
-@keyframes scroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(calc(-100% - 1280px)); /* Adjust 1280px to match the container width */
-    }
-}
+        .scroll-animation {
+            animation: scroll linear forwards;
+        }
 
-.scroll-animation {
-    animation: scroll linear forwards;
-}
+        /* New CSS for Horizontal Accordion */
+        #accordion-container {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            bottom: 3px;
+            height: 120px;
+            background-color: transparent;
+            display: flex;
+            overflow: hidden;
+            /* Hide overflow to prevent scroll bars */
+            z-index: 10;
+            opacity: 0;
+            /* Initially hidden */
+            transform: translateX(-100%);
+            /* Initially off-screen to the left */
+        }
 
+        .accordion-item {
+            background-color: #e33502;
+            width: 120px;
+            height: 120px;
+            /* Fixed size */
+            position: relative;
+            /* Add relative positioning */
+        }
+
+        .accordion-content {
+            background-color: #e33502;
+            height: 100%;
+            /* Adjust height to fill the container */
+            display: flex;
+            /* Use flexbox for layout */
+            flex-direction: column;
+            /* Arrange items in a column */
+            justify-content: flex-end;
+            /* Align items at the bottom */
+            opacity: 0;
+            /* Hide opacity initially */
+        }
+
+        .accordion-content img {
+            height: 110px;
+            width: 110px;
+            display: block;
+            margin: auto;
+        }
+
+        /* New CSS for Lightning Effect */
+        #lightning-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            z-index: 5;
+            display: none;
+        }
     </style>
 </head>
+
 <body>
-
-<div id="container">
-<div id="goal-achieved-layer" style="display: none;"></div>
-<div id="feeder-triggered" style="display: none;">Feeder Triggered</div>
-    <div id="qr-code">
-        <img src="https://lnb.bolverker.com/api/v1/qrcode/LNURL1DP68GURN8GHJ7MRWVGHXYMMVWEJHY6M9WGHXXMMD9AKXUATJD3CZ7M240PGHGMCN94Q2E" width='120' height='120' style="border-radius: 12px;">
-        <img id="lightning-img" src="./images/lightninggoatslogo1.png" width='125' height='125' style="border-radius: 12px; display: none;">
-    </div>
-    <div id="sats_left"></div>
-    <div id="content">
-    <div id="bottom-container">
-        <div id="progress-container">
-            <div id="progress-fill"></div>
-            <div id="progress-text"></div>
+    <div id="container">
+        <div id="goal-achieved-layer" style="display: none;"></div>
+        <div id="feeder-triggered" style="display: none;">Feeder Triggered</div>
+        <div id="qr-code">
+            <img src="images/qr.png" width='120' height='120' style="border-radius: 12px;">
+            <img id="lightning-img" src="images/lightning.png" width='117' height='117'
+                style="border-radius: 12px; display: none;">
         </div>
-        <div id="time-temperature-container">
-            <div id="current-time"></div>
-            <div id="current-temperature"></div>
+        <div id="sats_left"></div>
+        <div id="content">
+            <div id="bottom-container">
+                <div id="progress-container">
+                    <div id="progress-fill"></div>
+                    <div id="progress-text"></div>
+                </div>
+                <div id="time-temperature-container">
+                    <div id="current-time"></div>
+                    <div id="current-temperature"></div>
+                </div>
+                <div id="scrolling-comment"></div>
+            </div>
         </div>
-        <div id="scrolling-comment"></div>
-    </div>    
+        <!-- Accordion Container -->
+        <div id="accordion-container" style="display: none;"></div>
+        <!-- Lightning Effect Overlay -->
+        <div id="lightning-effect"></div>
     </div>
-</div>
 
-<script>
-    let balance = 0;
-    let goal = 0;
-    let lastSuccessfulGoal = 0;
-    let lastSuccessfulBalance = 0;
-    let goalAchieved = false;
-    let ws;
-    const WS_URL = `wss://lnb.bolverker.com/api/v1/ws/ab00773393ed4e5eb3b41bf8c4f87cc8`;
-    let reconnectInterval = 30000;
-    let messageQueue = [];
-    let isScrolling = false;
-    const bottomContainer = document.getElementById('bottom-container');
+    <script>
+        let balance = 0;
+        let goal = 0;
+        let lastSuccessfulGoal = 0;
+        let lastSuccessfulBalance = 0;
+        let goalAchieved = false;
+        let isAnimating = false;
+        let messageQueue = [];
+        let isScrolling = false;
+        let accordionTimeout = null;
+        let processedPaymentHashes = new Set();
+        const reconnectInterval = 30000;
+        const bottomContainer = document.getElementById('bottom-container');
 
+        // Goat information
+        const goats = {
+            "Newton": { img: "images/newton.png" },
+            "Nova": { img: "images/nova.png" },
+            "Cosmo": { img: "images/cosmo.png" },
+            "Dexter": { img: "images/dexter.png" },
+            "Rowan": { img: "images/rowan.png" }
+        };
 
- function fetchConversionRate() {
-    return fetch('https://lightning-goats.com/convert/0.01')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .catch(error => {
-            throw error; // Propagate error to be handled where the function is called
-        });
-}
-
-  function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
-    const satsLeftElem = document.getElementById('sats_left');
-    if (toggle) {
-        satsLeftElem.innerText = `${receivedAmount} sats received`;
-    } else {
-        if (currentSatsLeft > 0) {
-            satsLeftElem.innerText = `${currentSatsLeft} sats to go`;
+        function fetchConversionRate() {
+            return fetch('https://lightning-goats.com/convert/0.01')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .catch(error => {
+                    console.error('Error fetching conversion rate:', error);
+                });
         }
-        // Do nothing if currentSatsLeft is 0 or negative
-    }
-}
 
-function fetchAndDisplayMessages(info = false) {
-    let url = "https://lightning-goats.com/messages";
-    if (info === true) {
-        url += "/info";
-    }
+        function fetchAndDisplayMessages(info = false) {
+            let url = "https://lightning-goats.com/messages";
+            if (info === true) {
+                url += "/info";
+            }
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (Array.isArray(data)) {
-                data.forEach(message => {
-                    addMessageToQueue(message.content);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        data.forEach(message => {
+                            let processedMessage = message.content
+                                .replace(/[\r\n]+/g, ' ')
+                                .replace(/\s+/g, ' ')
+                                .replace(/https?:\/\/\S+/g, '') // Remove URLs
+                                .trim();
+                            addMessageToQueue(processedMessage);
+                        });
+                        resetAllMessages(); // Reset messages after adding to queue
+                    } else {
+                        console.log("Unexpected data format received:", data);
+                    }
+                })
+                .catch(error => {
+                    console.log("Error fetching messages: ", error);
+                });
+        }
+
+        function resetAllMessages() {
+            return fetch('https://lightning-goats.com/messages/reset')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .catch(error => {
+                    console.error('Error resetting messages:', error);
+                });
+        }
+
+        function periodicallyUpdate() {
+            checkFeederStatus().then(isFeederOn => {
+                if (!isFeederOn) {
+                    Promise.all([fetchBalance(), fetchGoal()])
+                        .then(() => {
+                            updateSatsLeftText();
+                            updateProgressBar();
+
+                            if (Math.random() < 0.005) {
+                                fetchAndDisplayMessages(true); // Display informational message
+                            }
+                        })
+                        .catch(error => {
+                            console.log("Error updating sats left and goal: ", error);
+                        });
+                }
+            });
+            fetchTemperature();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const debouncedCheckFeederStatus = debounce(checkFeederStatus, 1000);
+
+        function checkFeederStatus() {
+            return fetch('https://lightning-goats.com/feeder_status')
+                .then(response => response.text())
+                .then(isFeederOn => {
+                    const feederStatus = isFeederOn.trim() === 'true';
+                    const satsLeftElem = document.getElementById('sats_left');
+                    if (feederStatus) {
+                        satsLeftElem.innerText = "Feeder paused";
+                    }
+                    return feederStatus;
+                })
+                .catch(error => {
+                    console.error('Failed to fetch feeder status:', error);
+                    document.getElementById('sats_left').innerText = "Status error! Check connection.";
+                    return false;
+                });
+        }
+
+        function initWebSocket() {
+            const ws = new WebSocket('wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52');
+
+            ws.onopen = function () {
+                console.log("WebSocket connection opened.");
+            };
+
+            ws.onerror = function (error) {
+                console.log("WebSocket connection error: ", error);
+                setTimeout(initWebSocket, reconnectInterval);
+            };
+
+            ws.onmessage = function (event) {
+                console.log("Payment received event: ", event.data);
+                const data = JSON.parse(event.data);
+
+		// Update balance and goal                                                                                     
+                balance = data.wallet_balance;
+                goal = Math.floor(data.payment.extra.wallet_fiat_rate);
+
+                console.log(`Updated balance to ${balance}`);
+                console.log(`Updated goal (wallet_fiat_rate) to ${goal}`);
+
+		checkFeederStatus().then(isFeederOn => {
+                    if (!isFeederOn) {
+                        const receivedAmount = data.payment.amount / 1000;
+                            const currentSatsLeft = goal - balance;
+
+                            if (receivedAmount > 0) {
+                                updateSatsLeftElem(receivedAmount, currentSatsLeft, true);
+                                toggleQRCodeImage(); // Call the new function here
+
+                                updateProgressBar();
+
+                                fetchConversionRate().then(limit => {
+                                    setTimeout(() => {
+                                        updateSatsLeftElem(receivedAmount, currentSatsLeft, false);
+                                    }, 2000);
+
+                                    fetchAndDisplayMessages(); // Fetch messages when payment is received
+                                }).catch(error => {
+                                    console.error('Error fetching conversion rate:', error);
+                                });
+                            }
+                    }
+                });
+            };
+
+            ws.onclose = function () {
+                console.log("WebSocket connection closed. Reconnecting...");
+                setTimeout(initWebSocket, reconnectInterval);
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            Promise.all([fetchGoal(), fetchBalance()])  // Removed fetchSpotsRemaining
+                .then(() => {
+                    updateProgressBar();
+                    updateSatsLeftText();
+                })
+                .catch(error => {
+                    console.log("An error occurred:", error);
                 });
 
-                displayNextMessage();
-            } else {
-                console.log("Unexpected data format received:", data);
-            }
-        })
-        .catch(error => {
-            console.log("Error fetching messages: ", error);
-        });
-}
-
-function resetAllMessages() {
-  return fetch('https://lightning-goats.com/messages/reset')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .catch(error => {
-            throw error; // Propagate error to be handled where the function is called
+            initWebSocket();  // Initialize the WebSocket connection
+            const updateInterval = 30000;
+            setInterval(periodicallyUpdate, updateInterval);
+            setInterval(updateCurrentTime, 1000); // Call updateCurrentTime directly to update every second
+            setInterval(debouncedCheckFeederStatus, 1000);
+            fetchTemperature();
+            setInterval(fetchTemperature, updateInterval);
+            fetchAndDisplayMessages(); // Fetch messages initially
+            setInterval(fetchAndDisplayMessages, 1000);
         });
 
-}
-
-  function periodicallyUpdate() {
-    Promise.all([fetchBalance(), fetchGoal()])
-        .then(() => {
-            updateSatsLeftText();  // Update the "sats left" text
-            updateProgressBar();   // Update the progress bar and check the goal
-             
-            if (Math.random() < 0.33) {  // 0.1 is 1/10, representing a 10% chance
-                fetchAndDisplayMessages(true);
-            }
-        })
-        .catch(error => {
-            console.log("Error updating sats left and goal: ", error);
-        });
-}
-
-  // Initialize WebSocket
-  function initWebSocket() {
-    ws = new WebSocket(WS_URL);
-
-    ws.addEventListener('open', function() {
-        console.log("WebSocket is open now.");
-    });
-
-    ws.addEventListener('close', function() {
-        console.log("WebSocket is closed now.");
-        setTimeout(initWebSocket, reconnectInterval);
-    });
-
-    ws.addEventListener('error', function(error) {
-        console.log("WebSocket Error: " + error);
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.close();
-        }
-    });
-
-    ws.addEventListener('message', function(event) {
-        const data = JSON.parse(event.data);
-
-        if (data.payment.checking_id && data.payment.checking_id.startsWith("internal")) {
-            setTimeout(() => {
-                updateProgressBar();
-                updateSatsLeftText();
-            }, 1500); // 1500 milliseconds = 1.5 seconds
-            return;
+        function fetchGoal() {
+            return new Promise((resolve, reject) => {
+                fetch("https://lightning-goats.com/trigger_amount")
+                    .then(response => response.json())
+                    .then(data => {
+                        const newGoal = parseFloat(data.trigger_amount);
+                        if (!isNaN(newGoal)) {
+                            lastSuccessfulGoal = newGoal;
+                            goal = newGoal;
+                            resolve();
+                        } else {
+                            reject(new Error("Invalid trigger amount received"));
+                            console.error("Invalid trigger amount received");
+                            goal = lastSuccessfulGoal;
+                        }
+                    })
+                    .catch(error => {
+                        reject(new Error("Failed to fetch trigger amount"));
+                        console.error('Error fetching goal:', error);
+                        goal = lastSuccessfulGoal;
+                    });
+            });
         }
 
-        if (data.wallet_balance !== undefined) {
-            balance = data.wallet_balance;
-            const receivedAmount = data.payment.amount / 1000;
-            const currentSatsLeft = goal - balance;
-
-            // Toggle the QR code to lightning image
-            if (receivedAmount > 0) {
-              updateSatsLeftElem(receivedAmount, currentSatsLeft, true);
-              const qrCode = document.querySelector('#qr-code img:first-child');
-              const lightningImg = document.getElementById('lightning-img');
-              qrCode.style.display = 'none';
-              lightningImg.style.display = 'block';
-
-              updateProgressBar();
-
-              fetchConversionRate().then(limit => {
-                  setTimeout(() => {
-                      updateSatsLeftElem(receivedAmount, currentSatsLeft, false);
-                      qrCode.style.display = 'block';
-                      lightningImg.style.display = 'none';
-                  }, 2000);
-                
-                  fetchAndDisplayMessages();
-              }).catch(error => {
-                  console.error('Error fetching conversion rate:', error);
-              });
-          }
-      }
-
-        //if (data.payment.extra.comment !== undefined) {
-        //    addMessageToQueue(data.payment.extra.comment);
-        //}
-    });
-}
-  
-document.addEventListener('DOMContentLoaded', function() {
-        // Fetch both goal and balance, then update the progress bar
-        Promise.all([fetchGoal(), fetchBalance()])
-            .then(() => {
-                updateProgressBar();
-                updateSatsLeftText();
+        function fetchBalance() {
+    return new Promise((resolve, reject) => {
+        fetch("https://lightning-goats.com/balance")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();  // Parse the response as JSON
+            })
+            .then(data => {
+                if (data && typeof data.balance === 'number' && data.balance >= 0) {
+                    balance = Math.round(data.balance);  // Extract and round the balance
+                    resolve();
+                } else {
+                    console.error("Invalid balance data received:", data);
+                    reject(new Error("Invalid balance data received"));
+                }
             })
             .catch(error => {
-                console.log("An error occurred:", error);
+                console.error("Error fetching balance:", error);
+                reject(new Error("Failed to fetch balance"));
             });
-        
-    // Initialize WebSocket
-    initWebSocket();
-    const updateInterval =30000;
-    setInterval(periodicallyUpdate, updateInterval);
-    setInterval(updateCurrentTime, 1000);
-    fetchTemperature();
-    setInterval(fetchTemperature, updateInterval);
-    setInterval(fetchAndDisplayMessages, 1000);
-});
-
-function addMessageToQueue(messageText) {
-    console.log("Message added to queue:", messageText); // Log the text being added to the queue
-    messageQueue.push(messageText);
-    if (!isScrolling) {
-        displayNextMessage();
-    }
+    });
 }
 
-function displayNextMessage() {
-    if (messageQueue.length > 0 && !isScrolling) {
-        const messageText = messageQueue.shift(); // Directly use the message text
-        addScrollingComment(messageText);
-    } else {
-        resetAllMessages();
-    }
-}
 
-function addScrollingComment(commentText) {
-    if (isScrolling) {
-        return; // Exit if another message is still scrolling
-    }
+        function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
+            const satsLeftElem = document.getElementById('sats_left');
+            if (toggle) {
+                satsLeftElem.innerText = `${receivedAmount} sats received`;
+            } else {
+                if (currentSatsLeft > 0) {
+                    satsLeftElem.innerText = `${currentSatsLeft} sats to go`;
+                }
+            }
+        }
 
-    isScrolling = true;
-    const commentDiv = document.createElement('div');
-    commentDiv.className = 'scrolling-comment';
-    commentDiv.innerText = commentText;
+        function updateSatsLeftText() {
+            let satsLeft = Math.round(Math.max(goal - balance, 0));
+            if (satsLeft === 0) {
+                if (lastSuccessfulBalance > 0 && lastSuccessfulGoal > 0) {
+                    satsLeft = Math.round(Math.max(lastSuccessfulGoal - lastSuccessfulBalance, 0));
+                }
+            }
+            document.getElementById('sats_left').innerText = `${satsLeft} sats to go`;
+        }
 
-    const bottomContainer = document.getElementById('bottom-container');
-    bottomContainer.appendChild(commentDiv);
+        function updateProgressBar() {
+            if (goal === 0) {
+                return;
+            }
 
-    // Position the div so that its right edge is aligned with the container's right edge
-    commentDiv.style.right = `-${commentDiv.offsetWidth}px`;
+            const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
+            gsap.to("#progress-fill", { width: `${progress}%`, duration: 2 });
+            document.getElementById('progress-text').innerText = `${Math.round(progress)}%`;
 
-    const scroll = () => {
-        requestAnimationFrame(() => {
+            if (progress >= 100 && !goalAchieved && !isAnimating) {
+                goalAchieved = true;
+                isAnimating = true;
+
+                gsap.to("#goal-achieved-layer", { display: 'block', opacity: 0.7, duration: 0.25 });
+                gsap.to("#feeder-triggered", { display: 'block', opacity: 1, duration: 0.5 });
+
+                triggerLightningEffect(); // Call the lightning effect function here
+
+                setTimeout(() => {
+                    gsap.to("#goal-achieved-layer", { display: 'none', opacity: 0, duration: 0.5 });
+                    gsap.to("#feeder-triggered", {
+                        display: 'none',
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            isAnimating = false;
+                        }
+                    });
+                }, 500);
+            } else if (progress < 100) {
+                goalAchieved = false;
+                processedPaymentHashes.clear(); // Clear processed payment hashes when progress is below 100%
+            }
+        }
+
+        function triggerLightningEffect() {
+            const lightningEffect = document.getElementById('lightning-effect');
+            const feederTriggeredText = document.getElementById('feeder-triggered');
+
+            gsap.set(lightningEffect, { display: 'block', opacity: 0 });
+
+            gsap.timeline()
+                .to([lightningEffect, feederTriggeredText], {
+                    opacity: 1,
+                    duration: 0.1,
+                    repeat: 2,
+                    yoyo: true,
+                    onStart: () => feederTriggeredText.style.color = '#000', // Invert text color to black
+                    onComplete: () => feederTriggeredText.style.color = '#FFF' // Revert text color to white
+                }) // Flash effect
+                .to(lightningEffect, { display: 'none', opacity: 0, duration: 0, onComplete: fetchBalance });
+        }
+
+        function fetchTemperature() {
+            fetch('https://lightning-goats.com/get_received_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.AmbientWeatherWS2902A_WeatherDataWs2902a_Temperature) {
+                        let temperature = data.AmbientWeatherWS2902A_WeatherDataWs2902a_Temperature.toString();
+                        document.getElementById('current-temperature').innerText = `${temperature}°F`;
+                    } else {
+                        console.error('Invalid temperature data received:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching temperature:', error);
+                });
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const formattedTime = now.toLocaleTimeString();
+            document.getElementById('current-time').innerText = `${formattedTime}`;
+        }
+
+        function addMessageToQueue(messageText) {
+            messageQueue.push(messageText);
+            if (!isScrolling) {
+                displayNextMessage();
+            }
+        }
+
+        function displayNextMessage() {
+            if (messageQueue.length > 0 && !isScrolling) {
+                const messageText = messageQueue.shift();
+                addScrollingComment(messageText);
+            }
+        }
+
+        function addScrollingComment(commentText) {
+            if (isScrolling) {
+                return;
+            }
+
+            isScrolling = true;
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'scrolling-comment';
+            commentDiv.innerText = commentText;
+
+            const bottomContainer = document.getElementById('bottom-container');
+            bottomContainer.appendChild(commentDiv);
+
+            commentDiv.style.right = `-${commentDiv.offsetWidth}px`;
+
             const commentWidth = commentDiv.offsetWidth;
             const containerWidth = bottomContainer.offsetWidth;
             const totalTranslation = commentWidth + containerWidth;
 
-            const scrollSpeed = 80; // pixels per second
+            const scrollSpeed = 100;
             const scrollDuration = totalTranslation / scrollSpeed;
 
-            commentDiv.style.transition = `transform ${scrollDuration}s linear`;
-            commentDiv.style.transform = `translateX(-${totalTranslation}px)`;
+            // Show accordion while message scrolls
+            const hasGoatNames = checkForGoatNames(commentText);
 
-            // Calculate the distance at which to display the next message (e.g., 80% of the total translation)
-            const triggerDistance = totalTranslation * 0.8;
-
-            let displayedNext = false;
-
-            commentDiv.addEventListener('transitionend', () => {
-                bottomContainer.removeChild(commentDiv);
-                isScrolling = false;
-            });
-
-            commentDiv.addEventListener('transitionrun', () => {
-                const checkProgress = () => {
-                    const currentTranslation = Math.abs(parseInt(getComputedStyle(commentDiv).transform.split(',')[4]));
-
-                    if (currentTranslation >= triggerDistance && !displayedNext) {
-                        displayedNext = true;
-                        if (messageQueue.length > 0) {
-                            displayNextMessage();
-                        }
+            gsap.to(commentDiv, {
+                x: -totalTranslation,
+                duration: scrollDuration,
+                ease: "linear",
+                onComplete: () => {
+                    bottomContainer.removeChild(commentDiv);
+                    isScrolling = false;
+                    if (messageQueue.length > 0) {
+                        displayNextMessage();
                     }
-
-                    if (currentTranslation < totalTranslation) {
-                        requestAnimationFrame(checkProgress);
+                    if (!hasGoatNames && accordionTimeout === null) {
+                        gsap.to("#accordion-container", {
+                            x: '-100%',
+                            opacity: 0,
+                            duration: 1,
+                            onComplete: () => {
+                                gsap.set("#accordion-container", { display: 'none' });
+                            }
+                        }); // Retract accordion when scrolling ends
                     }
-                };
-
-                requestAnimationFrame(checkProgress);
-            });
-        });
-    };
-
-    scroll();
-}function fetchGoal() {
-    return new Promise((resolve, reject) => {
-        fetch("https://lightning-goats.com/trigger_amount")
-            .then(response => response.json())
-            .then(data => {
-                const newGoal = parseFloat(data.trigger_amount);
-                if (!isNaN(newGoal)) {
-                    lastSuccessfulGoal = newGoal;
-                    goal = newGoal;
-                    resolve();
-                } else {
-                    reject(new Error("Invalid trigger amount received"));
-                    console.error("Invalid trigger amount received");
-                    // Use the last successful value
-                    goal = lastSuccessfulGoal;
                 }
-            })
-            .catch(error => {
-                reject(new Error("Failed to fetch trigger amount"));
-                console.error('Error fetching goal:', error);
-                // Use the last successful value
-                goal = lastSuccessfulGoal;
             });
-    });
-}
-
-    function fetchBalance() {
-    return new Promise((resolve, reject) => {
-        fetch("https://lightning-goats.com/balance")
-            .then(response => response.text())
-            .then(data => {
-                const newBalance = parseFloat(data);
-                if (!isNaN(newBalance)) {
-                    lastSuccessfulBalance = newBalance / 1000;
-                    balance = newBalance / 1000;
-                    resolve();
-                } else {
-                    reject(new Error("Invalid balance received"));
-                    console.error("Invalid balance received");
-                    // Use the last successful value
-                    balance = lastSuccessfulBalance;
-                }
-            })
-            .catch(error => {
-                reject(new Error("Failed to fetch balance"));
-                console.error('Error fetching balance:', error);
-                // Use the last successful value
-                balance = lastSuccessfulBalance;
-            });
-    });
-}
-    
-  function updateSatsLeftText() {
-    let satsLeft = Math.round(Math.max(goal - balance, 0));
-    if (satsLeft === 0) {
-        if (lastSuccessfulBalance > 0 && lastSuccessfulGoal > 0) {
-            satsLeft = Math.round(Math.max(lastSuccessfulGoal - lastSuccessfulBalance, 0));
         }
-    }
-    document.getElementById('sats_left').innerText = `${satsLeft} sats to go`;
-}
 
-function updateProgressBar() {
-    if (goal === 0) {
-        return;
-    }
+        function toggleQRCodeImage() {
+            const qrCode = document.querySelector('#qr-code img:first-child');
+            const lightningImg = document.getElementById('lightning-img');
 
-    const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
-    document.getElementById('progress-fill').style.width = `${progress}%`;
-    document.getElementById('progress-text').innerText = `${Math.round(progress)}%`;
+            // Hide the QR code and show the lightning image
+            gsap.to(qrCode, {
+                duration: 0.125, opacity: 0, onComplete: () => {
+                    qrCode.style.display = 'none';
+                    lightningImg.style.display = 'block';
+                    gsap.to(lightningImg, { duration: 0.125, opacity: 1 });
+                }
+            });
 
-    // Check if goal is achieved
-    if (progress >= 100 && !goalAchieved) {
-        goalAchieved = true;  // Set the flag to true
+            // Hide the lightning image and show the QR code after 2 seconds
+            setTimeout(() => {
+                gsap.to(lightningImg, {
+                    duration: 0.5, opacity: 0, onComplete: () => {
+                        lightningImg.style.display = 'none';
+                        qrCode.style.display = 'block';
+                        gsap.to(qrCode, { duration: 0.5, opacity: 1 });
+                    }
+                });
+            }, 2000);
+        }
 
-        // Show the goal-achieved-layer and "Feeder Triggered"
-        document.getElementById('goal-achieved-layer').style.display = 'block';
-        document.getElementById('feeder-triggered').style.display = 'block';
+        function updateTextWithGSAP(element, newText, duration = 0.5) {
+            gsap.to(element, {
+                duration: duration / 2,
+                opacity: 0,
+                onComplete: () => {
+                    element.innerText = newText;
+                    gsap.to(element, { duration: duration / 2, opacity: 1 });
+                }
+            });
+        }
 
-        // Toggle back after .5 second
-        setTimeout(() => {
-            document.getElementById('goal-achieved-layer').style.display = 'none';
-            document.getElementById('feeder-triggered').style.display = 'none';
-        }, 500);
-        
-        setTimeout(() => {
-          goalAchieved = false;  // Reset the flag after three seconds
-        }, 3000);
-    }
-}
+        function checkForGoatNames(messageText) {
+            const goatNames = Object.keys(goats);
+            const matchedGoats = [];
 
-function fetchTemperature() {
-    fetch('https://lightning-goats.com/get_received_data')
-        .then(response => response.json())
-        .then(data => {
-            let temperature = data[0].AmbientWeatherWS2902A_WeatherDataWs2902a_Temperature.toString();
-            
-            document.getElementById('current-temperature').innerText = `  ${temperature}°F`;
-        })
-        .catch(error => {
-        });
-}
+            // Extract the order of goat names as they appear in the message
+            goatNames.forEach(name => {
+                if (messageText.includes(name)) {
+                    const index = messageText.indexOf(name);
+                    matchedGoats.push({ name, index });
+                }
+            });
 
-function updateCurrentTime() {
-    const now = new Date();
-    const formattedTime = now.toLocaleTimeString();
-    document.getElementById('current-time').innerText = `${formattedTime}`;
-}
+            // Sort the matched goats based on their order in the message
+            matchedGoats.sort((a, b) => a.index - b.index);
 
-</script>
+            const accordionContainer = document.getElementById('accordion-container');
+            accordionContainer.innerHTML = ""; // Clear previous content
 
+            if (matchedGoats.length > 0) {
+                matchedGoats.forEach(({ name }) => {
+                    const goat = goats[name];
+                    const item = document.createElement('div');
+                    item.className = 'accordion-item';
+
+                    const content = document.createElement('div');
+                    content.className = 'accordion-content';
+
+                    const img = document.createElement('img');
+                    img.src = goat.img;
+                    img.alt = name;
+
+                    content.appendChild(img);
+                    item.appendChild(content);
+
+                    accordionContainer.appendChild(item);
+
+                    // Only change opacity of the content
+                    gsap.to(content, { opacity: 1, duration: 1 }); // Slower animation
+                });
+
+                // GSAP animation for sliding in the accordion container from the left
+                gsap.set(accordionContainer, { display: 'flex', x: '-100%' });
+                const containerWidth = accordionContainer.scrollWidth;
+                gsap.to(accordionContainer, { x: 0, opacity: 1, duration: 1, width: containerWidth });
+
+                // Clear any previous accordion timeout
+                if (accordionTimeout !== null) {
+                    clearTimeout(accordionTimeout);
+                    accordionTimeout = null;
+                }
+
+                // Ensure accordion stays visible for a fixed duration
+                accordionTimeout = setTimeout(() => {
+                    gsap.to(accordionContainer, {
+                        x: '-100%',
+                        opacity: 0,
+                        duration: 1,
+                        onComplete: () => {
+                            gsap.set("#accordion-container", { display: 'none' });
+                        }
+                    });
+                    accordionTimeout = null;
+                }, 18000); // Duration set to 12 seconds
+                return true;
+            }
+            return false;
+        }
+    </script>
 </body>
+
 </html>
