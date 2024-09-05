@@ -360,24 +360,17 @@
         }
 
         function periodicallyUpdate() {
-            checkFeederStatus().then(isFeederOn => {
-                if (!isFeederOn) {
-                    Promise.all([fetchBalance(), fetchGoal()])
-                        .then(() => {
-                            updateSatsLeftText();
-                            updateProgressBar();
-
-                            if (Math.random() < 0.005) {
-                                fetchAndDisplayMessages(true); // Display informational message
-                            }
-                        })
-                        .catch(error => {
-                            console.log("Error updating sats left and goal: ", error);
-                        });
-                }
-            });
-            fetchTemperature();
+    checkFeederStatus().then(isFeederOn => {
+        if (!isFeederOn) {
+            if (Math.random() < 0.005) {
+                fetchAndDisplayMessages(true); // Display informational message
+            }
         }
+    });
+	    fetchTemperature();
+	    fetchAndDisplayMessages();
+}
+
 
         function debounce(func, wait) {
             let timeout;
@@ -424,40 +417,26 @@
             };
 
             ws.onmessage = function (event) {
-                console.log("Payment received event: ", event.data);
-                const data = JSON.parse(event.data);
+    console.log("Payment received event: ", event.data);
+    const data = JSON.parse(event.data);
 
-		// Update balance and goal                                                                                     
-                balance = data.wallet_balance;
-                goal = Math.floor(data.payment.extra.wallet_fiat_rate);
+    // Update balance from WebSocket data
+    balance = data.wallet_balance;
 
-                console.log(`Updated balance to ${balance}`);
-                console.log(`Updated goal (wallet_fiat_rate) to ${goal}`);
+    console.log(`Updated balance to ${balance}`);
 
-		checkFeederStatus().then(isFeederOn => {
-                    if (!isFeederOn) {
-                        const receivedAmount = data.payment.amount / 1000;
-                            const currentSatsLeft = goal - balance;
+    checkFeederStatus().then(isFeederOn => {
+        if (!isFeederOn) {
+            const receivedAmount = data.payment.amount / 1000;
+            const currentSatsLeft = goal - balance;
+    
+            updateSatsLeftElem(receivedAmount, currentSatsLeft, true);
+            toggleQRCodeImage(); // Call the QR code lightning animation
+	    fetchAndDisplayMessages();
+        }
+    });
+};
 
-                            if (receivedAmount > 0) {
-                                updateSatsLeftElem(receivedAmount, currentSatsLeft, true);
-                                toggleQRCodeImage(); // Call the new function here
-
-                                updateProgressBar();
-
-                                fetchConversionRate().then(limit => {
-                                    setTimeout(() => {
-                                        updateSatsLeftElem(receivedAmount, currentSatsLeft, false);
-                                    }, 2000);
-
-                                    fetchAndDisplayMessages(); // Fetch messages when payment is received
-                                }).catch(error => {
-                                    console.error('Error fetching conversion rate:', error);
-                                });
-                            }
-                    }
-                });
-            };
 
             ws.onclose = function () {
                 console.log("WebSocket connection closed. Reconnecting...");
@@ -476,76 +455,80 @@
                 });
 
             initWebSocket();  // Initialize the WebSocket connection
-            const updateInterval = 30000;
+            const updateInterval = 1000;
             setInterval(periodicallyUpdate, updateInterval);
-            setInterval(updateCurrentTime, 1000); // Call updateCurrentTime directly to update every second
-            setInterval(debouncedCheckFeederStatus, 1000);
-            fetchTemperature();
-            setInterval(fetchTemperature, updateInterval);
+            setInterval(updateCurrentTime, updateInterval); // Call updateCurrentTime directly to update every second
+            setInterval(debouncedCheckFeederStatus, updateInterval);
+            periodicallyUpdate();
             fetchAndDisplayMessages(); // Fetch messages initially
-            setInterval(fetchAndDisplayMessages, 1000);
         });
 
         function fetchGoal() {
-            return new Promise((resolve, reject) => {
-                fetch("https://lightning-goats.com/trigger_amount")
-                    .then(response => response.json())
-                    .then(data => {
-                        const newGoal = parseFloat(data.trigger_amount);
-                        if (!isNaN(newGoal)) {
-                            lastSuccessfulGoal = newGoal;
-                            goal = newGoal;
-                            resolve();
-                        } else {
-                            reject(new Error("Invalid trigger amount received"));
-                            console.error("Invalid trigger amount received");
-                            goal = lastSuccessfulGoal;
-                        }
-                    })
-                    .catch(error => {
-                        reject(new Error("Failed to fetch trigger amount"));
-                        console.error('Error fetching goal:', error);
-                        goal = lastSuccessfulGoal;
-                    });
-            });
-        }
-
-        function fetchBalance() {
     return new Promise((resolve, reject) => {
-        fetch("https://lightning-goats.com/balance")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();  // Parse the response as JSON
-            })
+        fetch("https://lightning-goats.com/trigger_amount")
+            .then(response => response.json())
             .then(data => {
-                if (data && typeof data.balance === 'number' && data.balance >= 0) {
-                    balance = Math.round(data.balance);  // Extract and round the balance
+                const newGoal = parseFloat(data.trigger_amount);
+                if (!isNaN(newGoal)) {
+                    lastSuccessfulGoal = newGoal;
+                    goal = newGoal;
                     resolve();
                 } else {
-                    console.error("Invalid balance data received:", data);
-                    reject(new Error("Invalid balance data received"));
+                    reject(new Error("Invalid trigger amount received"));
+                    console.error("Invalid trigger amount received");
+                    goal = lastSuccessfulGoal;
                 }
             })
             .catch(error => {
-                console.error("Error fetching balance:", error);
-                reject(new Error("Failed to fetch balance"));
+                reject(new Error("Failed to fetch trigger amount"));
+                console.error('Error fetching goal:', error);
+                goal = lastSuccessfulGoal;
             });
     });
 }
 
 
-        function updateSatsLeftElem(receivedAmount, currentSatsLeft, toggle) {
-            const satsLeftElem = document.getElementById('sats_left');
-            if (toggle) {
-                satsLeftElem.innerText = `${receivedAmount} sats received`;
-            } else {
-                if (currentSatsLeft > 0) {
-                    satsLeftElem.innerText = `${currentSatsLeft} sats to go`;
-                }
-            }
+        function fetchBalance() {
+            return new Promise((resolve, reject) => {
+                fetch("https://lightning-goats.com/balance")
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();  // Parse the response as JSON
+                    })
+                    .then(data => {
+                        if (data && typeof data.balance === 'number' && data.balance >= 0) {
+                            balance = Math.round(data.balance);  // Extract and round the balance
+                            resolve();
+                        } else {
+                            console.error("Invalid balance data received:", data);
+                            reject(new Error("Invalid balance data received"));
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching balance:", error);
+                        reject(new Error("Failed to fetch balance"));
+                    });
+            });
         }
+
+        function updateSatsLeftElem(receivedAmount, toggle) {
+    const satsLeftElem = document.getElementById('sats_left');
+    const remainingSats = Math.max(goal - balance, 0);  // Calculate remaining sats
+
+    // Display the received amount briefly
+    if (toggle) {
+        satsLeftElem.innerText = `${receivedAmount} sats received`;
+
+        // After 2 seconds, switch to the remaining sats left
+        setTimeout(() => {
+            satsLeftElem.innerText = `${remainingSats} sats to go`;
+        }, 2000); // 2 seconds delay
+    } else {
+        satsLeftElem.innerText = `${remainingSats} sats to go`; // Show remaining sats after the feeder is triggered
+    }
+}
 
         function updateSatsLeftText() {
             let satsLeft = Math.round(Math.max(goal - balance, 0));
@@ -717,6 +700,7 @@
                         gsap.to(qrCode, { duration: 0.5, opacity: 1 });
                     }
                 });
+		updateProgressBar();
             }, 2000);
         }
 
