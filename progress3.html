@@ -289,7 +289,7 @@
             // ==================== Constants ====================
             const RECONNECT_INTERVAL_BASE = 30000; // Base interval for reconnection attempts (30 seconds)
             const MAX_RECONNECT_INTERVAL = 60000; // Maximum reconnection interval (60 seconds)
-            const FETCH_INTERVAL = 30000; // 30 seconds (Used for temperature)
+            const FETCH_INTERVAL = 16000; // 16 seconds (Used for temperature)
             const SATS_LEFT_DISPLAY_DURATION = 2000; // 2 seconds
             const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
             const API_BASE_URL = 'https://lightning-goats.com';
@@ -821,7 +821,8 @@
                 }
 
                 initWebSocket();
-                fetchAndDisplayMessages(); // Fetch regular messages on startup
+                resetMessages();
+                fetchTemperature();
 
                 // Set up intervals
                 setInterval(fetchTemperature, FETCH_INTERVAL);
