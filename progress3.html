@@ -301,7 +301,7 @@
                 "Dexter": { img: "images/dexter.png" },
                 "Rowan": { img: "images/rowan.png" }
             };
-            const INFO_MESSAGE_CHANCE = 0.5; // 50% chance
+            const INFO_MESSAGE_CHANCE = 0.4; // 40% chance
             const INFO_MESSAGE_INTERVAL = 60000; // 60 seconds
 
             // ==================== Cached DOM Elements ====================
@@ -332,6 +332,8 @@
             let reconnectInterval = RECONNECT_INTERVAL_BASE;
             let isFetchingMessages = false;
             const processedMessages = new Set();
+
+            let isGoalAchievedDelayActive = false; // Flag to prevent multiple delay timers
 
             // ==================== Helper Functions ====================
 
@@ -501,7 +503,30 @@
                     displayReceivedAmount(receivedAmount);
                 } else {
                     const newSatsLeft = Math.max(goal - balance, 0);
-                    satsLeftElem.innerText = newSatsLeft > 0 ? `${Math.round(newSatsLeft)} sats to go` : `Goal reached!`;
+                    if (newSatsLeft > 0) {
+                        satsLeftElem.innerText = `${Math.round(newSatsLeft)} sats to go`;
+                    } else {
+                        satsLeftElem.innerText = `Goal reached!`;
+
+                        // If no delay is active, start a 2-second delay to update sats_left again
+                        if (!isGoalAchievedDelayActive) {
+                            isGoalAchievedDelayActive = true; // Set the flag
+
+                            setTimeout(async () => {
+                                try {
+                                    // Fetch the latest goal and balance
+                                    await Promise.all([fetchGoal(), fetchBalance()]);
+                                    // Update sats_left again based on the new data
+                                    const updatedSatsLeft = Math.max(goal - balance, 0);
+                                    satsLeftElem.innerText = updatedSatsLeft > 0 ? `${Math.round(updatedSatsLeft)} sats to go` : `Goal reached!`;
+                                } catch (error) {
+                                    console.error('Error updating sats_left after goal achieved:', error);
+                                } finally {
+                                    isGoalAchievedDelayActive = false; // Reset the flag
+                                }
+                            }, SATS_LEFT_DISPLAY_DURATION); // 2000 milliseconds = 2 seconds
+                        }
+                    }
                 }
 
                 updateProgressBar();
@@ -534,15 +559,13 @@
                 const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
                 gsap.to(progressFill, { width: `${progress}%`, duration: 2 });
 
-                // Update progress text only if not currently displaying a message
-                if (!isScrolling) {
-                    progressText.innerText = `${Math.round(progress)}%`;
-                }
+                // Always update progress text based on current progress
+                progressText.innerText = `${Math.round(progress)}%`;
 
                 if (progress >= 100 && !goalAchieved && !isAnimating) {
                     goalAchieved = true;
                     isAnimating = true;
-                    triggerLightningEffect();
+                    triggerLightningEffect(); // Trigger the lightning effect
                 } else if (progress < 100) {
                     goalAchieved = false;
                 }
@@ -577,24 +600,27 @@
                         goalAchievedLayer.style.display = 'block';
                     },
                     onRepeat: () => {
+                        // Toggle text color between white and black for flashing effect
                         feederTriggeredText.style.color = feederTriggeredText.style.color === 'white' ? 'black' : 'white';
                     }
                 })
-                    .to([feederTriggeredText, goalAchievedLayer], {
-                        opacity: 1,
-                        duration: 1,
-                        onComplete: () => {
-                            feederTriggeredText.style.display = 'none';
-                            goalAchievedLayer.style.display = 'none';
-                        }
-                    })
-                    .to(lightningEffect, {
-                        opacity: 0,
-                        duration: 0.5,
-                        onComplete: () => {
-                            gsap.set(lightningEffect, { display: 'none' });
-                        }
-                    });
+                // Second part of the animation: Fade in elements
+                .to([feederTriggeredText, goalAchievedLayer], {
+                    opacity: 1,
+                    duration: 1,
+                    onComplete: () => {
+                        feederTriggeredText.style.display = 'none';
+                        goalAchievedLayer.style.display = 'none';
+                    }
+                })
+                // Third part of the animation: Fade out the lightning effect
+                .to(lightningEffect, {
+                    opacity: 0,
+                    duration: 0.5,
+                    onComplete: () => {
+                        gsap.set(lightningEffect, { display: 'none' });
+                    }
+                });
             }
 
             // ==================== WebSocket Handling ====================
@@ -704,7 +730,7 @@
                     // Animate the message moving from right to left
                     gsap.to(messageSpan, {
                         x: -messageWidth,
-                        duration: (containerWidth + messageWidth) / 100, // Adjust speed as needed (100 pixels per second)
+                        duration: (containerWidth + messageWidth) / 80, // Adjust speed as needed (80 pixels per second)
                         ease: "linear",
                         onComplete: () => {
                             scrollingComment.removeChild(messageSpan);
