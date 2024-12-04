@@ -15,8 +15,8 @@
 
         #container {
             position: absolute;
-            width: 1280px;
-            height: 720px;
+            width: 1920px;
+            height: 1080px;
             margin: auto;
             top: 0;
             left: 0;
@@ -27,8 +27,8 @@
             top: 2px;
             right: 5px;
             background-color: white;
-            width: 120px;
-            height: 120px;
+            width: 135px;
+            height: 135px;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             z-index: 3;
@@ -36,9 +36,9 @@
 
         #sats_left {
             position: absolute;
-            top: 121px;
+            top: 140px;
             right: 5px;
-            width: 120px;
+            width: 135px;
             padding-bottom: 3px;
             text-align: center;
             font-size: 12px;
@@ -63,7 +63,7 @@
             align-items: center;
             background-color: #e33502;
             border-radius: 12px;
-            padding: 3px 6px;
+            padding: 5px 10px;
             position: absolute;
             bottom: 0;
             left: 0;
@@ -78,8 +78,8 @@
             align-items: center;
             background-color: #e33502;
             border-radius: 7px;
-            padding: 3px 6px;
-            font-size: 12px;
+            padding: 5px 10px;
+            font-size: 14px;
             font-weight: bold;
             font-family: 'Arial', sans-serif;
             color: white;
@@ -88,7 +88,7 @@
 
         #current-time,
         #current-temperature {
-            margin-right: 5px;
+            margin-right: 10px;
         }
 
         #center-container {
@@ -101,7 +101,7 @@
         #progress-container {
             position: relative;
             width: 99%;
-            height: 13px;
+            height: 18px;
             background-color: #e6e6e6;
             border-radius: 7px;
             overflow: hidden;
@@ -123,10 +123,10 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            font-size: 10px;
+            font-size: 12px;
             font-family: 'Arial', sans-serif;
             font-weight: bold;
-            line-height: 13px;
+            line-height: 18px;
             color: #000;
             z-index: 3; /* Above progress-fill */
             white-space: nowrap;
@@ -147,25 +147,27 @@
             z-index: 4; /* Above progress-text */
             overflow: hidden;
             pointer-events: none; /* Allows interactions with underlying elements */
+            display: flex;
+            align-items: center;
         }
 
         #scrolling-comment .message {
             position: absolute;
             white-space: nowrap;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             color: #000; /* Black text */
-            /* Removed background-color */
-            padding: 2px 5px;
+            padding: 3px 6px;
             border-radius: 5px;
+            align: center;
         }
 
         #accordion-container {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            bottom: 3px;
-            height: 120px;
+            top: 5px;
+            left: 5px;
+            bottom: 5px;
+            height: 135px;
             background-color: transparent;
             display: flex;
             overflow: hidden;
@@ -176,8 +178,8 @@
 
         .accordion-item {
             background-color: #e33502;
-            width: 120px;
-            height: 120px;
+            width: 135px;
+            height: 135px;
             position: relative;
         }
 
@@ -191,8 +193,8 @@
         }
 
         .accordion-content img {
-            height: 110px;
-            width: 110px;
+            height: 125px;
+            width: 125px;
             display: block;
             margin: auto;
         }
@@ -220,10 +222,10 @@
             opacity: 0;
             display: none;
             text-align: center;
-            font-size: 48px;
+            font-size: 64px;
             font-weight: bold;
             color: white;
-            line-height: 720px;
+            line-height: 1080px;
         }
 
         #feeder-triggered {
@@ -234,11 +236,11 @@
             left: 0;
             text-align: center;
             color: black;
-            font-size: 48px;
+            font-size: 64px;
             font-weight: bold;
             display: none;
             z-index: 7;
-            line-height: 720px;
+            line-height: 1080px;
         }
 
         /* Animations */
@@ -261,8 +263,8 @@
         <div id="goal-achieved-layer"></div>
         <div id="feeder-triggered">Feeder Triggered!</div>
         <div id="qr-code">
-            <img src="images/qr.png" width='120' height='120' style="border-radius: 12px;">
-            <img id="lightning-img" src="images/lightning.png" width='117' height='117' style="border-radius: 12px; display: none;">
+            <img src="images/qr.png" width='135' height='135' style="border-radius: 12px;">
+            <img id="lightning-img" src="images/lightning.png" width='132' height='132' style="border-radius: 12px; display: none;">
         </div>
         <div id="sats_left"></div>
         <div id="content">
@@ -275,7 +277,7 @@
                     <div id="progress-container">
                         <div id="progress-fill"></div>
                         <div id="progress-text">0%</div>
-                        <div id="scrolling-comment"></div> <!-- Added Scrolling Comment Div -->
+                        <div id="scrolling-comment"></div>
                     </div>
                 </div>
             </div>
@@ -284,7 +286,7 @@
         <div id="lightning-effect"></div>
     </div>
 
-    <script>
+        <script>
         (function () {
             // ==================== Constants ====================
             const RECONNECT_INTERVAL_BASE = 30000; // Base interval for reconnection attempts (30 seconds)
@@ -347,7 +349,7 @@
                 try {
                     const response = await fetch(url, options);
                     if (!response.ok) {
-                        throw new Error(`Error fetching ${url}: ${response.statusText}`);
+                        throw new Error(Error fetching ${url}: ${response.statusText});
                     }
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
@@ -387,41 +389,44 @@
 
             /**
              * Fetch the current goal amount
+             * @returns {Promise<number>}
              */
             async function fetchGoal() {
                 try {
-                    const data = await fetchData(`${API_BASE_URL}/trigger_amount`);
+                    const data = await fetchData(${API_BASE_URL}/trigger_amount);
                     const newGoal = parseFloat(data.trigger_amount);
                     if (!isNaN(newGoal)) {
                         lastSuccessfulGoal = newGoal;
                         goal = newGoal;
-                        await updateSatsLeft(); // Centralized update without receivedAmount
+                        return newGoal;
                     } else {
                         throw new Error("Invalid trigger amount received");
                     }
                 } catch (error) {
                     goal = lastSuccessfulGoal;
                     console.error('Error fetching goal:', error);
+                    return lastSuccessfulGoal;
                 }
             }
 
             /**
              * Fetch the current balance
+             * @returns {Promise<number>}
              */
             async function fetchBalance() {
                 try {
-                    const data = await fetchData(`${API_BASE_URL}/balance`);
+                    const data = await fetchData(${API_BASE_URL}/balance);
                     if (data && typeof data.balance === 'number' && data.balance >= 0) {
                         lastSuccessfulBalance = data.balance;
                         balance = Math.round(data.balance);
-                        await updateSatsLeft(); // Centralized update without receivedAmount
+                        return balance;
                     } else {
-                        balance = lastSuccessfulBalance || 0;
                         throw new Error("Invalid balance data received");
                     }
                 } catch (error) {
                     balance = lastSuccessfulBalance || 0;
                     console.error('Error fetching balance:', error);
+                    return balance;
                 }
             }
 
@@ -430,11 +435,11 @@
              */
             async function fetchTemperature() {
                 try {
-                    const data = await fetchData(`${API_BASE_URL}/get_received_data`);
+                    const data = await fetchData(${API_BASE_URL}/get_received_data);
                     const temp = data.AmbientWeatherWS2902A_WeatherDataWs2902a_Temperature;
                     if (temp !== undefined) {
                         const temperature = Math.round(temp * 10) / 10;
-                        currentTempElem.innerText = `${temperature}°F`;
+                        currentTempElem.innerText = ${temperature}°F;
                     }
                 } catch (error) {
                     console.error('Error fetching temperature:', error);
@@ -449,7 +454,7 @@
                 if (isFetchingMessages) return;
                 isFetchingMessages = true;
 
-                let url = `${API_BASE_URL}/messages`;
+                let url = ${API_BASE_URL}/messages;
                 if (isInfo) {
                     url += "/info";
                 }
@@ -471,7 +476,7 @@
                         });
                     }
                 } catch (error) {
-                    console.error(`Error fetching ${isInfo ? 'informational' : 'regular'} messages:`, error);
+                    console.error(Error fetching ${isInfo ? 'informational' : 'regular'} messages:, error);
                 } finally {
                     isFetchingMessages = false;
                 }
@@ -482,7 +487,7 @@
              */
             async function resetAllMessages() {
                 try {
-                    await fetchData(`${API_BASE_URL}/messages/reset`);
+                    await fetchData(${API_BASE_URL}/messages/reset);
                     processedMessages.clear();
                 } catch (error) {
                     console.error('Error resetting messages:', error);
@@ -492,62 +497,64 @@
             // ==================== Update Functions ====================
 
             /**
+             * Display the received amount temporarily and handle updates
+             * @param {number} receivedAmount 
+             */
+            function displayReceivedAmount(receivedAmount) {
+                // Show received amount
+                satsLeftElem.innerText = ${Math.round(receivedAmount)} sats received;
+            }
+
+            /**
              * Update the sats left element based on the current balance and goal
-             * This function is centralized and should be called only when a payment is received and on startup
              * @param {number} receivedAmount - The amount of sats received (only for new payments)
              * @param {boolean} isNewPayment - Flag indicating if this is a new payment
              */
             async function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
                 if (isNewPayment) {
+                    // For new payments, just show the received amount and fetch messages
                     await fetchAndDisplayMessages(false);
                     displayReceivedAmount(receivedAmount);
+                    updateProgressBar();
                 } else {
+                    // For regular updates, calculate sats left using current balance and goal
                     const newSatsLeft = Math.max(goal - balance, 0);
+                    
                     if (newSatsLeft > 0) {
-                        satsLeftElem.innerText = `${Math.round(newSatsLeft)} sats to go`;
+                        satsLeftElem.innerText = ${Math.round(newSatsLeft)} sats to go;
                     } else {
-                        satsLeftElem.innerText = `Goal reached!`;
+                        satsLeftElem.innerText = Goal reached!;
 
-                        // If no delay is active, start a 2-second delay to update sats_left again
+                        // If no delay is active, start a 2-second delay to refresh data
                         if (!isGoalAchievedDelayActive) {
-                            isGoalAchievedDelayActive = true; // Set the flag
+                            isGoalAchievedDelayActive = true;
 
                             setTimeout(async () => {
                                 try {
-                                    // Fetch the latest goal and balance
-                                    await Promise.all([fetchGoal(), fetchBalance()]);
-                                    // Update sats_left again based on the new data
-                                    const updatedSatsLeft = Math.max(goal - balance, 0);
-                                    satsLeftElem.innerText = updatedSatsLeft > 0 ? `${Math.round(updatedSatsLeft)} sats to go` : `Goal reached!`;
+                                    // Fetch new data
+                                    const [newGoal, newBalance] = await Promise.all([
+                                        fetchGoal(),
+                                        fetchBalance()
+                                    ]);
+                                    
+                                    // Calculate new sats left directly
+                                    const updatedSatsLeft = Math.max(newGoal - newBalance, 0);
+                                    satsLeftElem.innerText = updatedSatsLeft > 0 
+                                        ? ${Math.round(updatedSatsLeft)} sats to go 
+                                        : Goal reached!;
+                                    
+                                    updateProgressBar();
                                 } catch (error) {
                                     console.error('Error updating sats_left after goal achieved:', error);
                                 } finally {
-                                    isGoalAchievedDelayActive = false; // Reset the flag
+                                    isGoalAchievedDelayActive = false;
                                 }
-                            }, SATS_LEFT_DISPLAY_DURATION); // 2000 milliseconds = 2 seconds
+                            }, SATS_LEFT_DISPLAY_DURATION);
                         }
                     }
+
+                    updateProgressBar();
                 }
-
-                updateProgressBar();
-            }
-
-            /**
-             * Display the received amount temporarily
-             * @param {number} receivedAmount 
-             */
-            function displayReceivedAmount(receivedAmount) {
-                satsLeftElem.innerText = `${Math.round(receivedAmount)} sats received`;
-
-                // Reset after display duration
-                setTimeout(async () => {
-                    try {
-                        await Promise.all([fetchGoal(), fetchBalance()]);
-                        updateProgressBar();
-                    } catch (error) {
-                        console.error('Error resetting sats left text:', error);
-                    }
-                }, SATS_LEFT_DISPLAY_DURATION);
             }
 
             /**
@@ -557,10 +564,10 @@
                 if (goal === 0) return;
 
                 const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
-                gsap.to(progressFill, { width: `${progress}%`, duration: 2 });
+                gsap.to(progressFill, { width: ${progress}%, duration: 2 });
 
                 // Always update progress text based on current progress
-                progressText.innerText = `${Math.round(progress)}%`;
+                progressText.innerText = ${Math.round(progress)}%;
 
                 if (progress >= 100 && !goalAchieved && !isAnimating) {
                     goalAchieved = true;
@@ -640,6 +647,7 @@
                     console.error('WebSocket error:', error);
                 };
 
+                // ==================== Updated WebSocket Message Handler ====================
                 ws.onmessage = async (event) => {
                     try {
                         const data = JSON.parse(event.data);
@@ -654,19 +662,41 @@
                         // Update balance directly
                         balance += receivedAmount;
                         lastSuccessfulBalance = balance;
-                        updateProgressBar();
+                        
+                        // First show the received amount
+                        await updateSatsLeft(receivedAmount, true);
+                        toggleQRCodeImage();
 
-                        if (receivedAmount > 0) {
-                            await updateSatsLeft(receivedAmount, true); // Centralized update
-                            toggleQRCodeImage();
-                        }
+                        // After the received amount display duration, update with current sats left
+                        setTimeout(async () => {
+                            try {
+                                // Fetch latest data
+                                const [newGoal, newBalance] = await Promise.all([
+                                    fetchGoal(),
+                                    fetchBalance()
+                                ]);
+                                
+                                // Update the display with current sats left
+                                const newSatsLeft = Math.max(newGoal - newBalance, 0);
+                                satsLeftElem.innerText = newSatsLeft > 0 
+                                    ? ${Math.round(newSatsLeft)} sats to go 
+                                    : Goal reached!;
+                                
+                                // Update progress bar
+                                updateProgressBar();
+                            } catch (error) {
+                                console.error('Error updating display after payment:', error);
+                            }
+                        }, SATS_LEFT_DISPLAY_DURATION);
+
                     } catch (error) {
                         console.error('Error processing WebSocket message:', error);
                     }
                 };
+                // ==================== End of Updated WebSocket Message Handler ====================
 
                 ws.onclose = (event) => {
-                    console.warn(`WebSocket closed: ${event.reason}. Reconnecting in ${currentReconnectInterval / 1000} seconds...`);
+                    console.warn(WebSocket closed: ${event.reason}. Reconnecting in ${currentReconnectInterval / 1000} seconds...);
                     setTimeout(() => {
                         currentReconnectInterval = Math.min(currentReconnectInterval * 2, MAX_RECONNECT_INTERVAL);
                         initWebSocket();
@@ -840,8 +870,14 @@
 
             document.addEventListener('DOMContentLoaded', async function () {
                 try {
-                    await Promise.all([fetchGoal(), fetchBalance()]);
-                    await updateSatsLeft(); // Centralized update on startup
+                    // Fetch initial data without triggering updateSatsLeft
+                    const [initialGoal, initialBalance] = await Promise.all([
+                        fetchGoal(),
+                        fetchBalance()
+                    ]);
+
+                    // Update UI with initial values
+                    updateSatsLeft();
                 } catch (error) {
                     console.error('Error during initial fetch:', error);
                 }
@@ -854,11 +890,11 @@
                 setInterval(fetchTemperature, FETCH_INTERVAL);
                 setInterval(updateCurrentTime, 1000);
                 setInterval(periodicallyFetchInfoMessages, INFO_MESSAGE_INTERVAL); // Every 1 minute
-                setInterval(fetchAndDisplayMessages, 1000); // Every second for regular messages
+                setInterval(fetchAndDisplayMessages, 500); // Every .5 second for regular messages
             });
 
             /**
-             * Periodically fetch informational messages with a 50% chance each minute
+             * Periodically fetch informational messages with a 40% chance each minute
              */
             function periodicallyFetchInfoMessages() {
                 if (Math.random() < INFO_MESSAGE_CHANCE) {
