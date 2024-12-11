@@ -15,8 +15,8 @@
 
         #container {
             position: absolute;
-            width: 1920px;
-            height: 1080px;
+            width: 1280px;
+            height: 720px;
             margin: auto;
             top: 0;
             left: 0;
@@ -27,8 +27,8 @@
             top: 2px;
             right: 5px;
             background-color: white;
-            width: 135px;
-            height: 135px;
+            width: 120px;
+            height: 120px;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             z-index: 3;
@@ -36,9 +36,9 @@
 
         #sats_left {
             position: absolute;
-            top: 140px;
+            top: 121px;
             right: 5px;
-            width: 135px;
+            width: 120px;
             padding-bottom: 3px;
             text-align: center;
             font-size: 12px;
@@ -63,7 +63,7 @@
             align-items: center;
             background-color: #e33502;
             border-radius: 12px;
-            padding: 5px 10px;
+            padding: 3px 6px;
             position: absolute;
             bottom: 0;
             left: 0;
@@ -78,8 +78,8 @@
             align-items: center;
             background-color: #e33502;
             border-radius: 7px;
-            padding: 5px 10px;
-            font-size: 14px;
+            padding: 3px 6px;
+            font-size: 12px;
             font-weight: bold;
             font-family: 'Arial', sans-serif;
             color: white;
@@ -88,7 +88,7 @@
 
         #current-time,
         #current-temperature {
-            margin-right: 10px;
+            margin-right: 5px;
         }
 
         #center-container {
@@ -101,7 +101,7 @@
         #progress-container {
             position: relative;
             width: 99%;
-            height: 18px;
+            height: 13px;
             background-color: #e6e6e6;
             border-radius: 7px;
             overflow: hidden;
@@ -123,10 +123,10 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             font-family: 'Arial', sans-serif;
             font-weight: bold;
-            line-height: 18px;
+            line-height: 13px;
             color: #000;
             z-index: 3; /* Above progress-fill */
             white-space: nowrap;
@@ -147,27 +147,26 @@
             z-index: 4; /* Above progress-text */
             overflow: hidden;
             pointer-events: none; /* Allows interactions with underlying elements */
-            display: flex;
-            align-items: center;
         }
 
         #scrolling-comment .message {
             position: absolute;
             white-space: nowrap;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #000; /* Black text */
-            padding: 3px 6px;
+            padding: 2px 5px;
             border-radius: 5px;
-            align: center;
+            will-change: transform; /* Hint for browser optimization */
+            transform: translate3d(0, -50%, 0); /* GPU acceleration */
         }
 
         #accordion-container {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            bottom: 5px;
-            height: 135px;
+            top: 3px;
+            left: 3px;
+            bottom: 3px;
+            height: 120px;
             background-color: transparent;
             display: flex;
             overflow: hidden;
@@ -178,8 +177,8 @@
 
         .accordion-item {
             background-color: #e33502;
-            width: 135px;
-            height: 135px;
+            width: 120px;
+            height: 120px;
             position: relative;
         }
 
@@ -193,8 +192,8 @@
         }
 
         .accordion-content img {
-            height: 125px;
-            width: 125px;
+            height: 110px;
+            width: 110px;
             display: block;
             margin: auto;
         }
@@ -209,6 +208,7 @@
             opacity: 0;
             z-index: 6;
             display: none;
+            pointer-events: none; /* Prevent blocking interactions */
         }
 
         #goal-achieved-layer {
@@ -222,25 +222,26 @@
             opacity: 0;
             display: none;
             text-align: center;
-            font-size: 64px;
+            font-size: 48px;
             font-weight: bold;
             color: white;
-            line-height: 1080px;
+            line-height: 720px;
         }
 
         #feeder-triggered {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            text-align: center;
-            color: black;
-            font-size: 64px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(227, 53, 2, 0.4); /* Semi-transparent red */
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 24px;
             font-weight: bold;
             display: none;
             z-index: 7;
-            line-height: 1080px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         /* Animations */
@@ -254,6 +255,7 @@
             }
         }
     </style>
+    <!-- GSAP Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
 
 </head>
@@ -261,12 +263,12 @@
 <body>
     <div id="container">
         <div id="goal-achieved-layer"></div>
-        <div id="feeder-triggered">Feeder Triggered!</div>
+        <div id="feeder-triggered">Feeder Triggered!</div> <!-- Feeder Triggered Element -->
         <div id="qr-code">
-            <img src="images/qr.png" width='135' height='135' style="border-radius: 12px;">
-            <img id="lightning-img" src="images/lightning.png" width='132' height='132' style="border-radius: 12px; display: none;">
+            <img src="images/qr.png" width='120' height='120' style="border-radius: 12px;">
+            <img id="lightning-img" src="images/lightning.png" width='117' height='117' style="border-radius: 12px; display: none;">
         </div>
-        <div id="sats_left"></div>
+        <div id="sats_left">0 sats to go</div>
         <div id="content">
             <div id="bottom-container">
                 <div id="time-temperature-container">
@@ -277,21 +279,21 @@
                     <div id="progress-container">
                         <div id="progress-fill"></div>
                         <div id="progress-text">0%</div>
-                        <div id="scrolling-comment"></div>
+                        <div id="scrolling-comment"></div> <!-- Scrolling Comment Div -->
                     </div>
                 </div>
             </div>
         </div>
         <div id="accordion-container" style="display: none;"></div>
-        <div id="lightning-effect"></div>
+        <div id="lightning-effect"></div> <!-- Lightning Effect Element -->
     </div>
 
-        <script>
+    <script>
         (function () {
             // ==================== Constants ====================
-            const RECONNECT_INTERVAL_BASE = 30000; // Base interval for reconnection attempts (30 seconds)
-            const MAX_RECONNECT_INTERVAL = 60000; // Maximum reconnection interval (60 seconds)
-            const FETCH_INTERVAL = 16000; // 16 seconds (Used for temperature)
+            const RECONNECT_INTERVAL_BASE = 30000; // 30 seconds
+            const MAX_RECONNECT_INTERVAL = 60000; // 60 seconds
+            const FETCH_INTERVAL = 16000; // 16 seconds (Temperature)
             const SATS_LEFT_DISPLAY_DURATION = 2000; // 2 seconds
             const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
             const API_BASE_URL = 'https://lightning-goats.com';
@@ -303,8 +305,9 @@
                 "Dexter": { img: "images/dexter.png" },
                 "Rowan": { img: "images/rowan.png" }
             };
-            const INFO_MESSAGE_CHANCE = 0.4; // 40% chance
+            const INFO_MESSAGE_CHANCE = 0.5; // 50% chance
             const INFO_MESSAGE_INTERVAL = 60000; // 60 seconds
+            const MAX_PROCESSED_HASHES = 25; // Limit to 25 processed hashes
 
             // ==================== Cached DOM Elements ====================
             const container = document.getElementById('container');
@@ -333,9 +336,8 @@
             let accordionTimeout = null;
             let reconnectInterval = RECONNECT_INTERVAL_BASE;
             let isFetchingMessages = false;
-            const processedMessages = new Set();
-
-            let isGoalAchievedDelayActive = false; // Flag to prevent multiple delay timers
+            let processedPaymentHashes = new Set();
+            let processedMessages = new Set();
 
             // ==================== Helper Functions ====================
 
@@ -349,7 +351,7 @@
                 try {
                     const response = await fetch(url, options);
                     if (!response.ok) {
-                        throw new Error(Error fetching ${url}: ${response.statusText});
+                        throw new Error(`Error fetching ${url}: ${response.statusText}`);
                     }
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
@@ -377,6 +379,23 @@
             }
 
             /**
+             * Throttle function to limit the rate at which a function can fire.
+             * @param {Function} func - The function to throttle
+             * @param {number} limit - The throttle interval in milliseconds
+             * @returns {Function}
+             */
+            function throttle(func, limit) {
+                let inThrottle;
+                return function (...args) {
+                    if (!inThrottle) {
+                        func.apply(this, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                };
+            }
+
+            /**
              * Format time to HH:MM AM/PM
              * @param {Date} date 
              * @returns {string}
@@ -385,48 +404,61 @@
                 return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
+            // ==================== Debouncing and Throttling ====================
+
+            /**
+             * Debounced version of updateProgressBar
+             */
+            const debouncedUpdateProgressBar = debounce(updateProgressBar, 100); // 100ms debounce
+
+            /**
+             * Throttle function to limit the rate at which updateSatsLeft can be called.
+             */
+            const throttledUpdateSatsLeft = throttle(updateSatsLeft, 200); // 200ms throttle
+
             // ==================== Fetch Functions ====================
 
             /**
              * Fetch the current goal amount
-             * @returns {Promise<number>}
+             * 
+             * Note: This function will be called only once during initial page load.
              */
             async function fetchGoal() {
                 try {
-                    const data = await fetchData(${API_BASE_URL}/trigger_amount);
+                    const data = await fetchData(`${API_BASE_URL}/trigger_amount`);
                     const newGoal = parseFloat(data.trigger_amount);
                     if (!isNaN(newGoal)) {
                         lastSuccessfulGoal = newGoal;
                         goal = newGoal;
-                        return newGoal;
+                        console.log(`Fetched new goal: ${goal}`);
+                        updateSatsLeft(); // Centralized update without receivedAmount
                     } else {
                         throw new Error("Invalid trigger amount received");
                     }
                 } catch (error) {
                     goal = lastSuccessfulGoal;
                     console.error('Error fetching goal:', error);
-                    return lastSuccessfulGoal;
                 }
             }
 
             /**
              * Fetch the current balance
-             * @returns {Promise<number>}
              */
             async function fetchBalance() {
                 try {
-                    const data = await fetchData(${API_BASE_URL}/balance);
+                    const data = await fetchData(`${API_BASE_URL}/balance`);
                     if (data && typeof data.balance === 'number' && data.balance >= 0) {
                         lastSuccessfulBalance = data.balance;
                         balance = Math.round(data.balance);
-                        return balance;
+                        console.log(`Fetched new balance: ${balance}`);
+                        updateSatsLeft(); // Centralized update without receivedAmount
                     } else {
+                        balance = lastSuccessfulBalance || 0;
                         throw new Error("Invalid balance data received");
                     }
                 } catch (error) {
                     balance = lastSuccessfulBalance || 0;
                     console.error('Error fetching balance:', error);
-                    return balance;
                 }
             }
 
@@ -435,11 +467,12 @@
              */
             async function fetchTemperature() {
                 try {
-                    const data = await fetchData(${API_BASE_URL}/get_received_data);
+                    const data = await fetchData(`${API_BASE_URL}/get_received_data`);
                     const temp = data.AmbientWeatherWS2902A_WeatherDataWs2902a_Temperature;
                     if (temp !== undefined) {
-                        const temperature = Math.round(temp * 10) / 10;
-                        currentTempElem.innerText = ${temperature}°F;
+                        const temperature = Math.round(temp);
+                        currentTempElem.innerText = `${temperature} °F`;
+                        console.log(`Fetched temperature: ${temperature} °F`);
                     }
                 } catch (error) {
                     console.error('Error fetching temperature:', error);
@@ -454,7 +487,7 @@
                 if (isFetchingMessages) return;
                 isFetchingMessages = true;
 
-                let url = ${API_BASE_URL}/messages;
+                let url = `${API_BASE_URL}/messages`;
                 if (isInfo) {
                     url += "/info";
                 }
@@ -472,11 +505,12 @@
                             if (!processedMessages.has(processedMessage)) {
                                 addMessageToQueue(processedMessage);
                                 processedMessages.add(processedMessage);
+                                console.log(`Added message to queue: ${processedMessage}`);
                             }
                         });
                     }
                 } catch (error) {
-                    console.error(Error fetching ${isInfo ? 'informational' : 'regular'} messages:, error);
+                    console.error(`Error fetching ${isInfo ? 'informational' : 'regular'} messages:`, error);
                 } finally {
                     isFetchingMessages = false;
                 }
@@ -487,8 +521,9 @@
              */
             async function resetAllMessages() {
                 try {
-                    await fetchData(${API_BASE_URL}/messages/reset);
+                    await fetchData(`${API_BASE_URL}/messages/reset`);
                     processedMessages.clear();
+                    console.log('All messages have been reset.');
                 } catch (error) {
                     console.error('Error resetting messages:', error);
                 }
@@ -497,64 +532,39 @@
             // ==================== Update Functions ====================
 
             /**
-             * Display the received amount temporarily and handle updates
-             * @param {number} receivedAmount 
-             */
-            function displayReceivedAmount(receivedAmount) {
-                // Show received amount
-                satsLeftElem.innerText = ${Math.round(receivedAmount)} sats received;
-            }
-
-            /**
              * Update the sats left element based on the current balance and goal
+             * This function should be called only once per payment
              * @param {number} receivedAmount - The amount of sats received (only for new payments)
              * @param {boolean} isNewPayment - Flag indicating if this is a new payment
              */
-            async function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
+            function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
+                console.log(`updateSatsLeft called with receivedAmount=${receivedAmount}, isNewPayment=${isNewPayment}`);
+                console.log(`Current balance: ${balance}, Goal: ${goal}`);
+
                 if (isNewPayment) {
-                    // For new payments, just show the received amount and fetch messages
-                    await fetchAndDisplayMessages(false);
                     displayReceivedAmount(receivedAmount);
-                    updateProgressBar();
                 } else {
-                    // For regular updates, calculate sats left using current balance and goal
-                    const newSatsLeft = Math.max(goal - balance, 0);
-                    
-                    if (newSatsLeft > 0) {
-                        satsLeftElem.innerText = ${Math.round(newSatsLeft)} sats to go;
-                    } else {
-                        satsLeftElem.innerText = Goal reached!;
-
-                        // If no delay is active, start a 2-second delay to refresh data
-                        if (!isGoalAchievedDelayActive) {
-                            isGoalAchievedDelayActive = true;
-
-                            setTimeout(async () => {
-                                try {
-                                    // Fetch new data
-                                    const [newGoal, newBalance] = await Promise.all([
-                                        fetchGoal(),
-                                        fetchBalance()
-                                    ]);
-                                    
-                                    // Calculate new sats left directly
-                                    const updatedSatsLeft = Math.max(newGoal - newBalance, 0);
-                                    satsLeftElem.innerText = updatedSatsLeft > 0 
-                                        ? ${Math.round(updatedSatsLeft)} sats to go 
-                                        : Goal reached!;
-                                    
-                                    updateProgressBar();
-                                } catch (error) {
-                                    console.error('Error updating sats_left after goal achieved:', error);
-                                } finally {
-                                    isGoalAchievedDelayActive = false;
-                                }
-                            }, SATS_LEFT_DISPLAY_DURATION);
-                        }
-                    }
-
-                    updateProgressBar();
+                    const satsLeft = Math.max(goal - balance, 0);
+                    satsLeftElem.innerText = `${satsLeft} sats to go`;
+                    console.log(`satsLeftElem.innerText set to: ${satsLeft} sats to go`);
                 }
+
+                debouncedUpdateProgressBar();
+            }
+
+            /**
+             * Display the received amount temporarily
+             * @param {number} receivedAmount 
+             */
+            function displayReceivedAmount(receivedAmount) {
+                satsLeftElem.innerText = `${Math.round(receivedAmount)} sats received`;
+                console.log(`Displayed received amount: ${receivedAmount} sats`);
+
+                // Reset after display duration
+                setTimeout(() => {
+                    updateSatsLeft(); // Update sats_left to 'goal - balance'
+                    console.log('Reset sats_left after display duration.');
+                }, SATS_LEFT_DISPLAY_DURATION);
             }
 
             /**
@@ -564,70 +574,41 @@
                 if (goal === 0) return;
 
                 const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
-                gsap.to(progressFill, { width: ${progress}%, duration: 2 });
+                gsap.to(progressFill, { width: `${progress}%`, duration: 2 });
+                console.log(`Progress updated to: ${progress}%`);
 
-                // Always update progress text based on current progress
-                progressText.innerText = ${Math.round(progress)}%;
+                if (!isScrolling) {
+                    progressText.innerText = `${Math.round(progress)}%`;
+                    console.log(`Progress text updated to: ${Math.round(progress)}%`);
+                }
 
+                // Manage flags for lightning and feeder effects
                 if (progress >= 100 && !goalAchieved && !isAnimating) {
+                    console.log('Goal achieved! Triggering lightning and feeder effects.');
                     goalAchieved = true;
                     isAnimating = true;
-                    triggerLightningEffect(); // Trigger the lightning effect
-                } else if (progress < 100) {
+                    triggerLightningEffect();
+                    triggerFeederEffect();
+                } else if (progress < 100 && goalAchieved) {
+                    console.log('Progress below 100%. Resetting goalAchieved flag.');
                     goalAchieved = false;
                 }
             }
 
             /**
-             * Trigger lightning effect animation when goal is achieved
+             * Add a payment hash to the processedPaymentHashes set.
+             * If the set exceeds MAX_PROCESSED_HASHES, remove the oldest entry.
+             * @param {string} hash - The payment hash to add.
              */
-            async function triggerLightningEffect() {
-                gsap.set([lightningEffect, goalAchievedLayer, feederTriggeredText], { display: 'block', opacity: 0 });
-
-                const tl = gsap.timeline({
-                    onComplete: async () => {
-                        // After the animation, reset flags and fetch updated data
-                        isAnimating = false;
-                        try {
-                            await Promise.all([fetchGoal(), fetchBalance()]);
-                            updateProgressBar();
-                        } catch (error) {
-                            console.error('Error fetching data after lightning effect:', error);
-                        }
-                    }
-                });
-
-                tl.to([lightningEffect, goalAchievedLayer, feederTriggeredText], {
-                    opacity: 1,
-                    duration: 0.1,
-                    repeat: 3,
-                    yoyo: true,
-                    onStart: () => {
-                        feederTriggeredText.style.display = 'block';
-                        goalAchievedLayer.style.display = 'block';
-                    },
-                    onRepeat: () => {
-                        // Toggle text color between white and black for flashing effect
-                        feederTriggeredText.style.color = feederTriggeredText.style.color === 'white' ? 'black' : 'white';
-                    }
-                })
-                // Second part of the animation: Fade in elements
-                .to([feederTriggeredText, goalAchievedLayer], {
-                    opacity: 1,
-                    duration: 1,
-                    onComplete: () => {
-                        feederTriggeredText.style.display = 'none';
-                        goalAchievedLayer.style.display = 'none';
-                    }
-                })
-                // Third part of the animation: Fade out the lightning effect
-                .to(lightningEffect, {
-                    opacity: 0,
-                    duration: 0.5,
-                    onComplete: () => {
-                        gsap.set(lightningEffect, { display: 'none' });
-                    }
-                });
+            function addProcessedPaymentHash(hash) {
+                if (processedPaymentHashes.size >= MAX_PROCESSED_HASHES) {
+                    // Remove the first (oldest) hash in the set
+                    const firstHash = processedPaymentHashes.values().next().value;
+                    processedPaymentHashes.delete(firstHash);
+                    console.log(`Removed oldest payment hash: ${firstHash}`);
+                }
+                processedPaymentHashes.add(hash);
+                console.log(`Added payment hash: ${hash}`);
             }
 
             // ==================== WebSocket Handling ====================
@@ -635,68 +616,79 @@
             let ws;
             let currentReconnectInterval = RECONNECT_INTERVAL_BASE;
 
-            async function initWebSocket() {
+            /**
+             * Create a debounced version of fetchAndDisplayMessages(false)
+             */
+            const debouncedFetchMessages = debounce(() => fetchAndDisplayMessages(false), 500); // 500ms debounce
+
+            function initWebSocket() {
                 ws = new WebSocket(WS_URL);
 
                 ws.onopen = () => {
                     console.log('WebSocket connected');
-                    currentReconnectInterval = RECONNECT_INTERVAL_BASE; // Reset on successful connection
+                    currentReconnectInterval = RECONNECT_INTERVAL_BASE; // Reset on successful connection                      
                 };
 
                 ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
                 };
 
-                // ==================== Updated WebSocket Message Handler ====================
                 ws.onmessage = async (event) => {
+                    console.log('WebSocket message received:', event.data); // Log raw message data
+
                     try {
                         const data = JSON.parse(event.data);
-                        const receivedAmount = data.payment.amount / 1000;
+                        console.log('Parsed WebSocket message:', data); // Log parsed data object
 
-                        // Prevent multiple triggers if already animating
-                        if (isAnimating) {
-                            console.log('Already animating. Skipping message.');
+                        const receivedAmount = data.payment.amount / 1000; // Amount in sats
+                        const walletBalance = data.wallet_balance; // Wallet balance from the message
+                        const paymentHash = (data.payment.payment_hash || '').toLowerCase().trim(); // Normalize hash
+
+                        // Validate paymentHash
+                        if (!paymentHash) {
+                            console.log('No payment_hash found in the message. Skipping processing.');
                             return;
                         }
 
-                        // Update balance directly
-                        balance += receivedAmount;
-                        lastSuccessfulBalance = balance;
-                        
-                        // First show the received amount
-                        await updateSatsLeft(receivedAmount, true);
-                        toggleQRCodeImage();
+                        // Check if this payment has already been processed
+                        if (processedPaymentHashes.has(paymentHash)) {
+                            console.log(`Payment with hash ${paymentHash} has already been processed. Skipping.`);
+                            return; // Skip processing this payment
+                        }
 
-                        // After the received amount display duration, update with current sats left
-                        setTimeout(async () => {
-                            try {
-                                // Fetch latest data
-                                const [newGoal, newBalance] = await Promise.all([
-                                    fetchGoal(),
-                                    fetchBalance()
-                                ]);
-                                
-                                // Update the display with current sats left
-                                const newSatsLeft = Math.max(newGoal - newBalance, 0);
-                                satsLeftElem.innerText = newSatsLeft > 0 
-                                    ? ${Math.round(newSatsLeft)} sats to go 
-                                    : Goal reached!;
-                                
-                                // Update progress bar
-                                updateProgressBar();
-                            } catch (error) {
-                                console.error('Error updating display after payment:', error);
-                            }
-                        }, SATS_LEFT_DISPLAY_DURATION);
+                        // Mark this payment as processed with size limitation
+                        addProcessedPaymentHash(paymentHash);
+                        console.log(`Processing payment with hash: ${paymentHash}`);
 
+                        // Update balance
+                        balance = walletBalance; // Sync the balance directly with the wallet balance
+                        lastSuccessfulBalance = balance; // Update last successful balance
+                        console.log(`WebSocket updated balance: ${balance} sats`);
+
+                        if (receivedAmount > 0) {
+                            console.log(`Positive payment received: ${receivedAmount} sats`);
+                            throttledUpdateSatsLeft(receivedAmount, true); // Use throttled function
+                            toggleQRCodeImage();
+
+                            // Fetch messages once per positive payment
+                            debouncedFetchMessages();
+                            console.log('Debounced fetchAndDisplayMessages(false) scheduled after payment.');
+                        } else if (receivedAmount < 0) {
+                            console.log(`Negative payment detected: ${receivedAmount} sats. Handling outgoing payment.`);
+                            // Negative payments do not set a reset flag; progress bar recalculates based on updated balance
+                            throttledUpdateSatsLeft(); // Update sats_left based on new balance
+                            console.log('Throttled updateSatsLeft called for negative payment.');
+                            // Removed feeder effect trigger from negative payments
+                        } else {
+                            console.log('No payment amount detected (0 sats). Skipping update.');
+                        }
                     } catch (error) {
                         console.error('Error processing WebSocket message:', error);
                     }
                 };
-                // ==================== End of Updated WebSocket Message Handler ====================
 
                 ws.onclose = (event) => {
-                    console.warn(WebSocket closed: ${event.reason}. Reconnecting in ${currentReconnectInterval / 1000} seconds...);
+                    console.warn(`WebSocket closed: ${event.reason}. Reconnecting in ${currentReconnectInterval / 1000} seconds...`);
                     setTimeout(() => {
                         currentReconnectInterval = Math.min(currentReconnectInterval * 2, MAX_RECONNECT_INTERVAL);
                         initWebSocket();
@@ -712,6 +704,7 @@
              */
             function addMessageToQueue(messageText) {
                 messageQueue.push(messageText);
+                console.log(`Message added to queue: ${messageText}`);
                 if (!isScrolling) {
                     displayNextMessage();
                 }
@@ -723,6 +716,7 @@
             function displayNextMessage() {
                 if (messageQueue.length > 0 && !isScrolling) {
                     const messageText = messageQueue.shift();
+                    console.log(`Displaying message: ${messageText}`);
                     addScrollingComment(messageText);
                 } else if (messageQueue.length === 0 && !isScrolling) {
                     // Call resetAllMessages() when the message queue is empty
@@ -744,7 +738,14 @@
                 messageSpan.className = 'message';
                 messageSpan.innerText = commentText;
 
+                // Set initial position to the right outside of the container before appending
+                const containerWidth = scrollingComment.offsetWidth;
+                gsap.set(messageSpan, {
+                    x: containerWidth
+                });
+
                 scrollingComment.appendChild(messageSpan);
+                console.log(`Scrolling comment added: ${commentText}`);
 
                 // Hide the progress text while scrolling
                 progressText.style.display = 'none';
@@ -752,21 +753,24 @@
                 // Allow the messageSpan to render and get its width
                 requestAnimationFrame(() => {
                     const messageWidth = messageSpan.offsetWidth;
-                    const containerWidth = scrollingComment.offsetWidth;
-
-                    // Set initial position to the right outside of the container
-                    gsap.set(messageSpan, { x: containerWidth });
 
                     // Animate the message moving from right to left
+                    const duration = (containerWidth + messageWidth) / 100; // Adjust speed as needed (100 pixels per second)
                     gsap.to(messageSpan, {
                         x: -messageWidth,
-                        duration: (containerWidth + messageWidth) / 80, // Adjust speed as needed (80 pixels per second)
+                        duration: duration,
                         ease: "linear",
                         onComplete: () => {
                             scrollingComment.removeChild(messageSpan);
+                            console.log(`Scrolling comment removed: ${commentText}`);
                             isScrolling = false;
-                            progressText.style.display = 'flex'; // Show progress text again
-                            displayNextMessage();
+
+                            if (messageQueue.length > 0) {
+                                displayNextMessage();
+                            } else {
+                                progressText.style.display = 'flex';
+                                console.log('Progress text displayed after scrolling.');
+                            }
                         }
                     });
                 });
@@ -802,15 +806,18 @@
                         accordionContainer.appendChild(item);
 
                         gsap.to(content, { opacity: 1, duration: 1 });
+                        console.log(`Accordion content displayed for goat: ${name}`);
                     });
 
                     gsap.set(accordionContainer, { display: 'flex', x: '-100%' });
                     const containerWidth = accordionContainer.scrollWidth;
                     gsap.to(accordionContainer, { x: 0, opacity: 1, duration: 1, width: containerWidth });
+                    console.log('Accordion container animated into view.');
 
                     if (accordionTimeout !== null) {
                         clearTimeout(accordionTimeout);
                         accordionTimeout = null;
+                        console.log('Existing accordion timeout cleared.');
                     }
 
                     accordionTimeout = setTimeout(() => {
@@ -820,9 +827,11 @@
                             duration: 1,
                             onComplete: () => {
                                 gsap.set(accordionContainer, { display: 'none' });
+                                console.log('Accordion container animated out of view.');
                             }
                         });
                         accordionTimeout = null;
+                        console.log('Accordion timeout completed.');
                     }, 18000);
                     return true;
                 }
@@ -842,6 +851,7 @@
                         qrCode.style.display = 'none';
                         lightningImg.style.display = 'block';
                         gsap.to(lightningImg, { duration: 0.125, opacity: 1 });
+                        console.log('QR code hidden and lightning image displayed.');
                     }
                 });
 
@@ -853,6 +863,7 @@
                             lightningImg.style.display = 'none';
                             qrCode.style.display = 'block';
                             gsap.to(qrCode, { duration: 0.5, opacity: 1 });
+                            console.log('Lightning image hidden and QR code displayed.');
                         }
                     });
                 }, SATS_LEFT_DISPLAY_DURATION);
@@ -870,14 +881,21 @@
 
             document.addEventListener('DOMContentLoaded', async function () {
                 try {
-                    // Fetch initial data without triggering updateSatsLeft
-                    const [initialGoal, initialBalance] = await Promise.all([
-                        fetchGoal(),
-                        fetchBalance()
-                    ]);
+                    await fetchGoal(); // Fetch goal only once on initial load
+                    await fetchBalance(); // Fetch balance on page load
+                    await updateSatsLeft(); // Centralized update on startup
+                    console.log('Initial fetch and UI update completed.');
 
-                    // Update UI with initial values
-                    updateSatsLeft();
+                    // Calculate initial progress
+                    const initialProgress = Math.min(Math.max((balance / goal) * 100, 0), 100);
+                    if (initialProgress >= 100) {
+                        // Set goalAchieved to true to prevent triggering the lightning and feeder effects on initial load
+                        goalAchieved = true;
+                        isAnimating = true; // Set isAnimating since effects will be triggered
+                        console.log('Initial balance meets or exceeds goal. Triggering lightning and feeder effects.');
+                        triggerLightningEffect(); // Trigger effect if goal already achieved on load
+                        triggerFeederEffect();
+                    }
                 } catch (error) {
                     console.error('Error during initial fetch:', error);
                 }
@@ -890,17 +908,85 @@
                 setInterval(fetchTemperature, FETCH_INTERVAL);
                 setInterval(updateCurrentTime, 1000);
                 setInterval(periodicallyFetchInfoMessages, INFO_MESSAGE_INTERVAL); // Every 1 minute
-                setInterval(fetchAndDisplayMessages, 500); // Every .5 second for regular messages
+                // Removed the periodic fetchBalance to prevent conflicts
+                // setInterval(fetchBalance, FETCH_INTERVAL); // Ensure this is removed
             });
 
             /**
-             * Periodically fetch informational messages with a 40% chance each minute
+             * Periodically fetch informational messages with a 50% chance each minute
              */
             function periodicallyFetchInfoMessages() {
                 if (Math.random() < INFO_MESSAGE_CHANCE) {
                     fetchAndDisplayMessages(true); // Display informational message
+                    console.log('Attempting to fetch informational messages.');
+                } else {
+                    console.log('Skipping informational message fetch this interval.');
                 }
             }
+
+            // ==================== Cleanup Functions ====================
+
+            /**
+             * Cleanup processedPaymentHashes to prevent memory leaks
+             * Ensures the set doesn't exceed MAX_PROCESSED_HASHES
+             */
+            function cleanupProcessedPaymentHashes() {
+                // This is already handled in addProcessedPaymentHash
+                // If additional cleanup is needed based on time, consider implementing timestamps
+            }
+
+            // Set up an interval to clean up (if needed in future enhancements)
+            setInterval(cleanupProcessedPaymentHashes, 60000); // Every 1 minute
+
+            // ==================== Additional Functions ====================
+
+            /**
+             * Trigger the lightning effect when the goal is achieved
+             */
+            function triggerLightningEffect() {
+                // Flash the lightning-effect overlay using GSAP
+                gsap.to(lightningEffect, {
+                    display: 'block',
+                    opacity: 1,
+                    duration: 0.2,
+                    yoyo: true,
+                    repeat: 3,
+                    onComplete: () => {
+                        gsap.to(lightningEffect, { opacity: 0, duration: 0.2, onComplete: () => {
+                            lightningEffect.style.display = 'none';
+                            isAnimating = false; // Reset the animating flag
+                            console.log('Lightning effect completed.');
+                        }});
+                    }
+                });
+            }
+
+            /**
+             * Trigger the feeder effect when the goal is achieved
+             */
+            function triggerFeederEffect() {
+                console.log('Triggering feeder effect.');
+
+                // Display the feeder-triggered element with animation
+                feederTriggeredText.style.display = 'block';
+                gsap.fromTo(feederTriggeredText, 
+                    { opacity: 0, scale: 0.8 }, 
+                    { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
+
+                // Hide the feeder-triggered element after a certain duration
+                gsap.to(feederTriggeredText, {
+                    opacity: 0,
+                    scale: 1.2,
+                    duration: 0.5,
+                    delay: 2, // Display for 2 seconds
+                    ease: 'back.in(1.7)',
+                    onComplete: () => {
+                        feederTriggeredText.style.display = 'none';
+                        console.log('Feeder effect completed.');
+                    }
+                });
+            }
+
         })();
     </script>
 </body>
