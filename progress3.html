@@ -152,13 +152,13 @@
         #scrolling-comment .message {
             position: absolute;
             white-space: nowrap;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             color: #000; /* Black text */
             padding: 2px 5px;
             border-radius: 5px;
             will-change: transform; /* Hint for browser optimization */
-            transform: translate3d(0, -50%, 0); /* GPU acceleration */
+            transform: translateY(-50%);
         }
 
         #accordion-container {
@@ -233,7 +233,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(227, 53, 2, 0.4); /* Semi-transparent red */
+            background-color: rgba(230, 184, 2, 0.6); /* Semi-transparent yellow */
             color: white;
             padding: 20px 40px;
             border-radius: 10px;
@@ -263,7 +263,7 @@
 <body>
     <div id="container">
         <div id="goal-achieved-layer"></div>
-        <div id="feeder-triggered">Feeder Triggered!</div> <!-- Feeder Triggered Element -->
+        <div id="feeder-triggered">Feeder Triggered!</div>
         <div id="qr-code">
             <img src="images/qr.png" width='120' height='120' style="border-radius: 12px;">
             <img id="lightning-img" src="images/lightning.png" width='117' height='117' style="border-radius: 12px; display: none;">
@@ -279,37 +279,27 @@
                     <div id="progress-container">
                         <div id="progress-fill"></div>
                         <div id="progress-text">0%</div>
-                        <div id="scrolling-comment"></div> <!-- Scrolling Comment Div -->
+                        <div id="scrolling-comment"></div>
                     </div>
                 </div>
             </div>
         </div>
         <div id="accordion-container" style="display: none;"></div>
-        <div id="lightning-effect"></div> <!-- Lightning Effect Element -->
+        <div id="lightning-effect"></div>
     </div>
 
     <script>
         (function () {
-            // ==================== Constants ====================
             const RECONNECT_INTERVAL_BASE = 30000; // 30 seconds
             const MAX_RECONNECT_INTERVAL = 60000; // 60 seconds
-            const FETCH_INTERVAL = 16000; // 16 seconds (Temperature)
-            const SATS_LEFT_DISPLAY_DURATION = 2000; // 2 seconds
+            const FETCH_INTERVAL = 16000;
+            const SATS_LEFT_DISPLAY_DURATION = 2000;
             const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
             const API_BASE_URL = 'https://lightning-goats.com';
-            const GOAT_NAMES = ["Newton", "Nova", "Cosmo", "Dexter", "Rowan"];
-            const GOATS = {
-                "Newton": { img: "images/newton.png" },
-                "Nova": { img: "images/nova.png" },
-                "Cosmo": { img: "images/cosmo.png" },
-                "Dexter": { img: "images/dexter.png" },
-                "Rowan": { img: "images/rowan.png" }
-            };
-            const INFO_MESSAGE_CHANCE = 0.5; // 50% chance
+            const INFO_MESSAGE_CHANCE = 0.35;
             const INFO_MESSAGE_INTERVAL = 60000; // 60 seconds
-            const MAX_PROCESSED_HASHES = 25; // Limit to 25 processed hashes
+            const MAX_PROCESSED_HASHES = 25;
 
-            // ==================== Cached DOM Elements ====================
             const container = document.getElementById('container');
             const goalAchievedLayer = document.getElementById('goal-achieved-layer');
             const feederTriggeredText = document.getElementById('feeder-triggered');
@@ -320,33 +310,51 @@
             const currentTempElem = document.getElementById('current-temperature');
             const progressFill = document.getElementById('progress-fill');
             const progressText = document.getElementById('progress-text');
-            const accordionContainer = document.getElementById('accordion-container');
-            const lightningEffect = document.getElementById('lightning-effect');
             const scrollingComment = document.getElementById('scrolling-comment');
 
-            // ==================== State Variables ====================
             let balance = 0;
             let goal = 0;
             let lastSuccessfulGoal = 0;
             let lastSuccessfulBalance = 0;
             let goalAchieved = false;
             let isAnimating = false;
+
+            // messageQueue now stores objects: { id: number, text: string }
             let messageQueue = [];
             let isScrolling = false;
-            let accordionTimeout = null;
             let reconnectInterval = RECONNECT_INTERVAL_BASE;
             let isFetchingMessages = false;
+
             let processedPaymentHashes = new Set();
-            let processedMessages = new Set();
+            let processedMessages = new Set(); // Store message IDs to avoid duplicates
+            let infoMessagesDisplayed = 0;
 
-            // ==================== Helper Functions ====================
+            function debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
 
-            /**
-             * Generic fetch function with error handling
-             * @param {string} url - The URL to fetch
-             * @param {object} options - Fetch options
-             * @returns {Promise<any>}
-             */
+            function throttle(func, limit) {
+                let inThrottle;
+                return function (...args) {
+                    if (!inThrottle) {
+                        func.apply(this, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                };
+            }
+
+            function formatTime(date) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            const debouncedUpdateProgressBar = debounce(updateProgressBar, 100);
+            const throttledUpdateSatsLeft = throttle(updateSatsLeft, 200);
+
             async function fetchData(url, options = {}) {
                 try {
                     const response = await fetch(url, options);
@@ -364,65 +372,6 @@
                 }
             }
 
-            /**
-             * Debounce function to limit the rate at which a function can fire.
-             * @param {Function} func - The function to debounce
-             * @param {number} wait - The debounce interval in milliseconds
-             * @returns {Function}
-             */
-            function debounce(func, wait) {
-                let timeout;
-                return function (...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait);
-                };
-            }
-
-            /**
-             * Throttle function to limit the rate at which a function can fire.
-             * @param {Function} func - The function to throttle
-             * @param {number} limit - The throttle interval in milliseconds
-             * @returns {Function}
-             */
-            function throttle(func, limit) {
-                let inThrottle;
-                return function (...args) {
-                    if (!inThrottle) {
-                        func.apply(this, args);
-                        inThrottle = true;
-                        setTimeout(() => inThrottle = false, limit);
-                    }
-                };
-            }
-
-            /**
-             * Format time to HH:MM AM/PM
-             * @param {Date} date 
-             * @returns {string}
-             */
-            function formatTime(date) {
-                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            }
-
-            // ==================== Debouncing and Throttling ====================
-
-            /**
-             * Debounced version of updateProgressBar
-             */
-            const debouncedUpdateProgressBar = debounce(updateProgressBar, 100); // 100ms debounce
-
-            /**
-             * Throttle function to limit the rate at which updateSatsLeft can be called.
-             */
-            const throttledUpdateSatsLeft = throttle(updateSatsLeft, 200); // 200ms throttle
-
-            // ==================== Fetch Functions ====================
-
-            /**
-             * Fetch the current goal amount
-             * 
-             * Note: This function will be called only once during initial page load.
-             */
             async function fetchGoal() {
                 try {
                     const data = await fetchData(`${API_BASE_URL}/trigger_amount`);
@@ -431,7 +380,6 @@
                         lastSuccessfulGoal = newGoal;
                         goal = newGoal;
                         console.log(`Fetched new goal: ${goal}`);
-                        updateSatsLeft(); // Centralized update without receivedAmount
                     } else {
                         throw new Error("Invalid trigger amount received");
                     }
@@ -441,9 +389,6 @@
                 }
             }
 
-            /**
-             * Fetch the current balance
-             */
             async function fetchBalance() {
                 try {
                     const data = await fetchData(`${API_BASE_URL}/balance`);
@@ -451,7 +396,6 @@
                         lastSuccessfulBalance = data.balance;
                         balance = Math.round(data.balance);
                         console.log(`Fetched new balance: ${balance}`);
-                        updateSatsLeft(); // Centralized update without receivedAmount
                     } else {
                         balance = lastSuccessfulBalance || 0;
                         throw new Error("Invalid balance data received");
@@ -462,9 +406,6 @@
                 }
             }
 
-            /**
-             * Fetch the current temperature
-             */
             async function fetchTemperature() {
                 try {
                     const data = await fetchData(`${API_BASE_URL}/get_received_data`);
@@ -479,10 +420,6 @@
                 }
             }
 
-            /**
-             * Fetch and display messages
-             * @param {boolean} isInfo - Flag indicating if it's an informational message
-             */
             async function fetchAndDisplayMessages(isInfo = false) {
                 if (isFetchingMessages) return;
                 isFetchingMessages = true;
@@ -494,49 +431,126 @@
 
                 try {
                     const data = await fetchData(url);
+                    console.log('Data returned from messages endpoint:', data);
+
                     if (Array.isArray(data) && data.length > 0) {
+                        let newMessagesAdded = false;
                         data.forEach(message => {
+                            const messageId = message.id;
                             let processedMessage = message.content
                                 .replace(/[\r\n]+/g, ' ')
                                 .replace(/\s+/g, ' ')
                                 .replace(/https?:\/\/\S+/g, '')
                                 .trim();
 
-                            if (!processedMessages.has(processedMessage)) {
-                                addMessageToQueue(processedMessage);
-                                processedMessages.add(processedMessage);
-                                console.log(`Added message to queue: ${processedMessage}`);
+                            if (!processedMessages.has(messageId)) {
+                                processedMessages.add(messageId);
+                                addMessageToQueue(messageId, processedMessage, isInfo);
+                                newMessagesAdded = true;
                             }
                         });
+
+                        if (isInfo && newMessagesAdded) {
+                            infoMessagesDisplayed += 1;
+                            if (infoMessagesDisplayed >= 3) {
+                                resetAllMessages();
+                                infoMessagesDisplayed = 0;
+                            }
+                        }
                     }
                 } catch (error) {
-                    console.error(`Error fetching ${isInfo ? 'informational' : 'regular'} messages:`, error);
+                    console.error(`Error fetching ${isInfo ? 'info' : 'regular'} messages:`, error);
                 } finally {
                     isFetchingMessages = false;
                 }
             }
 
-            /**
-             * Reset all messages
-             */
-            async function resetAllMessages() {
-                try {
-                    await fetchData(`${API_BASE_URL}/messages/reset`);
-                    processedMessages.clear();
-                    console.log('All messages have been reset.');
-                } catch (error) {
-                    console.error('Error resetting messages:', error);
+            function addMessageToQueue(id, text, isInfo = false) {
+                messageQueue.push({ id, text });
+                console.log(`Queued message: ID=${id}, Text=${text}`);
+                if (!isScrolling) {
+                    displayNextMessage();
                 }
             }
 
-            // ==================== Update Functions ====================
+            function displayNextMessage() {
+                if (messageQueue.length === 0) {
+                    return;
+                }
 
-            /**
-             * Update the sats left element based on the current balance and goal
-             * This function should be called only once per payment
-             * @param {number} receivedAmount - The amount of sats received (only for new payments)
-             * @param {boolean} isNewPayment - Flag indicating if this is a new payment
-             */
+                const message = messageQueue.shift(); // {id, text}
+                console.log(`Displaying message: ${message.text}`);
+
+                isScrolling = true;
+                const messageSpan = document.createElement('span');
+                messageSpan.className = 'message';
+                messageSpan.innerText = message.text;
+
+                const containerWidth = scrollingComment.offsetWidth;
+                gsap.set(messageSpan, { x: containerWidth });
+                scrollingComment.appendChild(messageSpan);
+
+                progressText.style.display = 'none';
+
+                requestAnimationFrame(() => {
+                    const messageWidth = messageSpan.offsetWidth;
+                    const duration = (containerWidth + messageWidth) / 100;
+
+                    gsap.to(messageSpan, {
+                        x: -messageWidth,
+                        duration: duration,
+                        ease: "linear",
+                        onComplete: async () => {
+                            scrollingComment.removeChild(messageSpan);
+                            console.log(`Scrolling comment removed: ${message.text}`);
+                            isScrolling = false;
+                            progressText.style.display = 'flex';
+
+                            // Delete the message from the server now that it's displayed
+                            await deleteMessageFromServer([message.id]);
+
+                            if (messageQueue.length > 0) {
+                                displayNextMessage();
+                            }
+                        }
+                    });
+                });
+            }
+
+            async function deleteMessageFromServer(ids) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/messages/bulk_delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ ids })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Error deleting messages: ${response.statusText}`);
+                    }
+                    const result = await response.json();
+                    console.log(`Deleted ${result.deleted_count} messages from server.`);
+                } catch (err) {
+                    console.error('Error deleting messages from server:', err);
+                }
+            }
+
+            async function resetAllMessages() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/messages/reset`);
+                    if (!response.ok) {
+                        throw new Error(`Error resetting messages: ${response.statusText}`);
+                    }
+                    await response.json();
+                    processedMessages.clear();
+                    messageQueue = [];
+                    console.log('All messages have been reset.');
+                } catch (err) {
+                    console.error('Error resetting messages:', err);
+                }
+            }
+
             function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
                 console.log(`updateSatsLeft called with receivedAmount=${receivedAmount}, isNewPayment=${isNewPayment}`);
                 console.log(`Current balance: ${balance}, Goal: ${goal}`);
@@ -552,24 +566,16 @@
                 debouncedUpdateProgressBar();
             }
 
-            /**
-             * Display the received amount temporarily
-             * @param {number} receivedAmount 
-             */
             function displayReceivedAmount(receivedAmount) {
                 satsLeftElem.innerText = `${Math.round(receivedAmount)} sats received`;
                 console.log(`Displayed received amount: ${receivedAmount} sats`);
 
-                // Reset after display duration
                 setTimeout(() => {
-                    updateSatsLeft(); // Update sats_left to 'goal - balance'
+                    updateSatsLeft();
                     console.log('Reset sats_left after display duration.');
                 }, SATS_LEFT_DISPLAY_DURATION);
             }
 
-            /**
-             * Update the progress bar based on current balance and goal
-             */
             function updateProgressBar() {
                 if (goal === 0) return;
 
@@ -582,7 +588,6 @@
                     console.log(`Progress text updated to: ${Math.round(progress)}%`);
                 }
 
-                // Manage flags for lightning and feeder effects
                 if (progress >= 100 && !goalAchieved && !isAnimating) {
                     console.log('Goal achieved! Triggering lightning and feeder effects.');
                     goalAchieved = true;
@@ -595,14 +600,8 @@
                 }
             }
 
-            /**
-             * Add a payment hash to the processedPaymentHashes set.
-             * If the set exceeds MAX_PROCESSED_HASHES, remove the oldest entry.
-             * @param {string} hash - The payment hash to add.
-             */
             function addProcessedPaymentHash(hash) {
                 if (processedPaymentHashes.size >= MAX_PROCESSED_HASHES) {
-                    // Remove the first (oldest) hash in the set
                     const firstHash = processedPaymentHashes.values().next().value;
                     processedPaymentHashes.delete(firstHash);
                     console.log(`Removed oldest payment hash: ${firstHash}`);
@@ -611,22 +610,15 @@
                 console.log(`Added payment hash: ${hash}`);
             }
 
-            // ==================== WebSocket Handling ====================
-
             let ws;
             let currentReconnectInterval = RECONNECT_INTERVAL_BASE;
-
-            /**
-             * Create a debounced version of fetchAndDisplayMessages(false)
-             */
-            const debouncedFetchMessages = debounce(() => fetchAndDisplayMessages(false), 500); // 500ms debounce
 
             function initWebSocket() {
                 ws = new WebSocket(WS_URL);
 
                 ws.onopen = () => {
                     console.log('WebSocket connected');
-                    currentReconnectInterval = RECONNECT_INTERVAL_BASE; // Reset on successful connection                      
+                    currentReconnectInterval = RECONNECT_INTERVAL_BASE;
                 };
 
                 ws.onerror = (error) => {
@@ -634,51 +626,44 @@
                 };
 
                 ws.onmessage = async (event) => {
-                    console.log('WebSocket message received:', event.data); // Log raw message data
+                    console.log('WebSocket message received:', event.data);
 
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('Parsed WebSocket message:', data); // Log parsed data object
+                        console.log('Parsed WebSocket message:', data);
 
-                        const receivedAmount = data.payment.amount / 1000; // Amount in sats
-                        const walletBalance = data.wallet_balance; // Wallet balance from the message
-                        const paymentHash = (data.payment.payment_hash || '').toLowerCase().trim(); // Normalize hash
+                        const receivedAmount = data.payment.amount / 1000;
+                        const walletBalance = data.wallet_balance;
+                        const paymentHash = (data.payment.payment_hash || '').toLowerCase().trim();
 
-                        // Validate paymentHash
                         if (!paymentHash) {
                             console.log('No payment_hash found in the message. Skipping processing.');
                             return;
                         }
 
-                        // Check if this payment has already been processed
                         if (processedPaymentHashes.has(paymentHash)) {
                             console.log(`Payment with hash ${paymentHash} has already been processed. Skipping.`);
-                            return; // Skip processing this payment
+                            return;
                         }
 
-                        // Mark this payment as processed with size limitation
                         addProcessedPaymentHash(paymentHash);
                         console.log(`Processing payment with hash: ${paymentHash}`);
 
-                        // Update balance
-                        balance = walletBalance; // Sync the balance directly with the wallet balance
-                        lastSuccessfulBalance = balance; // Update last successful balance
+                        balance = walletBalance;
+                        lastSuccessfulBalance = balance;
                         console.log(`WebSocket updated balance: ${balance} sats`);
 
                         if (receivedAmount > 0) {
                             console.log(`Positive payment received: ${receivedAmount} sats`);
-                            throttledUpdateSatsLeft(receivedAmount, true); // Use throttled function
+                            throttledUpdateSatsLeft(receivedAmount, true);
                             toggleQRCodeImage();
 
-                            // Fetch messages once per positive payment
-                            debouncedFetchMessages();
-                            console.log('Debounced fetchAndDisplayMessages(false) scheduled after payment.');
+                            setTimeout(() => {
+                                fetchAndDisplayMessages(false);
+                            }, 1000); // wait a second
                         } else if (receivedAmount < 0) {
-                            console.log(`Negative payment detected: ${receivedAmount} sats. Handling outgoing payment.`);
-                            // Negative payments do not set a reset flag; progress bar recalculates based on updated balance
-                            throttledUpdateSatsLeft(); // Update sats_left based on new balance
-                            console.log('Throttled updateSatsLeft called for negative payment.');
-                            // Removed feeder effect trigger from negative payments
+                            console.log(`Negative payment detected: ${receivedAmount} sats.`);
+                            throttledUpdateSatsLeft();
                         } else {
                             console.log('No payment amount detected (0 sats). Skipping update.');
                         }
@@ -696,153 +681,6 @@
                 };
             }
 
-            // ==================== Message Queue Handling ====================
-
-            /**
-             * Add a message to the queue
-             * @param {string} messageText 
-             */
-            function addMessageToQueue(messageText) {
-                messageQueue.push(messageText);
-                console.log(`Message added to queue: ${messageText}`);
-                if (!isScrolling) {
-                    displayNextMessage();
-                }
-            }
-
-            /**
-             * Display the next message in the queue
-             */
-            function displayNextMessage() {
-                if (messageQueue.length > 0 && !isScrolling) {
-                    const messageText = messageQueue.shift();
-                    console.log(`Displaying message: ${messageText}`);
-                    addScrollingComment(messageText);
-                } else if (messageQueue.length === 0 && !isScrolling) {
-                    // Call resetAllMessages() when the message queue is empty
-                    resetAllMessages();
-                }
-            }
-
-            /**
-             * Add a scrolling comment to the scrolling-comment div
-             * @param {string} commentText 
-             */
-            function addScrollingComment(commentText) {
-                if (isScrolling) return;
-
-                isScrolling = true;
-
-                const hasGoatNames = checkForGoatNames(commentText);
-                const messageSpan = document.createElement('span');
-                messageSpan.className = 'message';
-                messageSpan.innerText = commentText;
-
-                // Set initial position to the right outside of the container before appending
-                const containerWidth = scrollingComment.offsetWidth;
-                gsap.set(messageSpan, {
-                    x: containerWidth
-                });
-
-                scrollingComment.appendChild(messageSpan);
-                console.log(`Scrolling comment added: ${commentText}`);
-
-                // Hide the progress text while scrolling
-                progressText.style.display = 'none';
-
-                // Allow the messageSpan to render and get its width
-                requestAnimationFrame(() => {
-                    const messageWidth = messageSpan.offsetWidth;
-
-                    // Animate the message moving from right to left
-                    const duration = (containerWidth + messageWidth) / 100; // Adjust speed as needed (100 pixels per second)
-                    gsap.to(messageSpan, {
-                        x: -messageWidth,
-                        duration: duration,
-                        ease: "linear",
-                        onComplete: () => {
-                            scrollingComment.removeChild(messageSpan);
-                            console.log(`Scrolling comment removed: ${commentText}`);
-                            isScrolling = false;
-
-                            if (messageQueue.length > 0) {
-                                displayNextMessage();
-                            } else {
-                                progressText.style.display = 'flex';
-                                console.log('Progress text displayed after scrolling.');
-                            }
-                        }
-                    });
-                });
-            }
-
-            /**
-             * Check if the message contains any goat names and handle accordion display
-             * @param {string} messageText 
-             * @returns {boolean}
-             */
-            function checkForGoatNames(messageText) {
-                const matchedGoats = GOAT_NAMES.filter(name => messageText.includes(name))
-                    .map(name => ({ name, index: messageText.indexOf(name) }))
-                    .sort((a, b) => a.index - b.index);
-
-                accordionContainer.innerHTML = "";
-
-                if (matchedGoats.length > 0) {
-                    matchedGoats.forEach(({ name }) => {
-                        const goat = GOATS[name];
-                        const item = document.createElement('div');
-                        item.className = 'accordion-item';
-
-                        const content = document.createElement('div');
-                        content.className = 'accordion-content';
-
-                        const img = document.createElement('img');
-                        img.src = goat.img;
-                        img.alt = name;
-
-                        content.appendChild(img);
-                        item.appendChild(content);
-                        accordionContainer.appendChild(item);
-
-                        gsap.to(content, { opacity: 1, duration: 1 });
-                        console.log(`Accordion content displayed for goat: ${name}`);
-                    });
-
-                    gsap.set(accordionContainer, { display: 'flex', x: '-100%' });
-                    const containerWidth = accordionContainer.scrollWidth;
-                    gsap.to(accordionContainer, { x: 0, opacity: 1, duration: 1, width: containerWidth });
-                    console.log('Accordion container animated into view.');
-
-                    if (accordionTimeout !== null) {
-                        clearTimeout(accordionTimeout);
-                        accordionTimeout = null;
-                        console.log('Existing accordion timeout cleared.');
-                    }
-
-                    accordionTimeout = setTimeout(() => {
-                        gsap.to(accordionContainer, {
-                            x: '-100%',
-                            opacity: 0,
-                            duration: 1,
-                            onComplete: () => {
-                                gsap.set(accordionContainer, { display: 'none' });
-                                console.log('Accordion container animated out of view.');
-                            }
-                        });
-                        accordionTimeout = null;
-                        console.log('Accordion timeout completed.');
-                    }, 18000);
-                    return true;
-                }
-                return false;
-            }
-
-            // ==================== UI Update Functions ====================
-
-            /**
-             * Toggle between QR code and lightning image
-             */
             function toggleQRCodeImage() {
                 gsap.to(qrCode, {
                     duration: 0.125,
@@ -869,116 +707,53 @@
                 }, SATS_LEFT_DISPLAY_DURATION);
             }
 
-            /**
-             * Update the current time display
-             */
             function updateCurrentTime() {
                 const now = new Date();
                 currentTimeElem.innerText = formatTime(now);
             }
 
-            // ==================== Initialization ====================
-
-            document.addEventListener('DOMContentLoaded', async function () {
-                try {
-                    await fetchGoal(); // Fetch goal only once on initial load
-                    await fetchBalance(); // Fetch balance on page load
-                    await updateSatsLeft(); // Centralized update on startup
-                    console.log('Initial fetch and UI update completed.');
-
-                    // Calculate initial progress
-                    const initialProgress = Math.min(Math.max((balance / goal) * 100, 0), 100);
-                    if (initialProgress >= 100) {
-                        // Set goalAchieved to true to prevent triggering the lightning and feeder effects on initial load
-                        goalAchieved = true;
-                        isAnimating = true; // Set isAnimating since effects will be triggered
-                        console.log('Initial balance meets or exceeds goal. Triggering lightning and feeder effects.');
-                        triggerLightningEffect(); // Trigger effect if goal already achieved on load
-                        triggerFeederEffect();
-                    }
-                } catch (error) {
-                    console.error('Error during initial fetch:', error);
-                }
-
-                initWebSocket();
-                resetAllMessages();
-                fetchTemperature();
-
-                // Set up intervals
-                setInterval(fetchTemperature, FETCH_INTERVAL);
-                setInterval(updateCurrentTime, 1000);
-                setInterval(periodicallyFetchInfoMessages, INFO_MESSAGE_INTERVAL); // Every 1 minute
-                // Removed the periodic fetchBalance to prevent conflicts
-                // setInterval(fetchBalance, FETCH_INTERVAL); // Ensure this is removed
-            });
-
-            /**
-             * Periodically fetch informational messages with a 50% chance each minute
-             */
             function periodicallyFetchInfoMessages() {
                 if (Math.random() < INFO_MESSAGE_CHANCE) {
-                    fetchAndDisplayMessages(true); // Display informational message
                     console.log('Attempting to fetch informational messages.');
+                    fetchAndDisplayMessages(true);
                 } else {
                     console.log('Skipping informational message fetch this interval.');
                 }
             }
 
-            // ==================== Cleanup Functions ====================
-
-            /**
-             * Cleanup processedPaymentHashes to prevent memory leaks
-             * Ensures the set doesn't exceed MAX_PROCESSED_HASHES
-             */
-            function cleanupProcessedPaymentHashes() {
-                // This is already handled in addProcessedPaymentHash
-                // If additional cleanup is needed based on time, consider implementing timestamps
-            }
-
-            // Set up an interval to clean up (if needed in future enhancements)
-            setInterval(cleanupProcessedPaymentHashes, 60000); // Every 1 minute
-
-            // ==================== Additional Functions ====================
-
-            /**
-             * Trigger the lightning effect when the goal is achieved
-             */
             function triggerLightningEffect() {
-                // Flash the lightning-effect overlay using GSAP
-                gsap.to(lightningEffect, {
+                gsap.to('#lightning-effect', {
                     display: 'block',
                     opacity: 1,
                     duration: 0.2,
                     yoyo: true,
                     repeat: 3,
                     onComplete: () => {
-                        gsap.to(lightningEffect, { opacity: 0, duration: 0.2, onComplete: () => {
-                            lightningEffect.style.display = 'none';
-                            isAnimating = false; // Reset the animating flag
-                            console.log('Lightning effect completed.');
-                        }});
+                        gsap.to('#lightning-effect', {
+                            opacity: 0,
+                            duration: 0.2,
+                            onComplete: () => {
+                                document.getElementById('lightning-effect').style.display = 'none';
+                                isAnimating = false;
+                                console.log('Lightning effect completed.');
+                            }
+                        });
                     }
                 });
             }
 
-            /**
-             * Trigger the feeder effect when the goal is achieved
-             */
             function triggerFeederEffect() {
                 console.log('Triggering feeder effect.');
-
-                // Display the feeder-triggered element with animation
                 feederTriggeredText.style.display = 'block';
-                gsap.fromTo(feederTriggeredText, 
-                    { opacity: 0, scale: 0.8 }, 
+                gsap.fromTo(feederTriggeredText,
+                    { opacity: 0, scale: 0.8 },
                     { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
 
-                // Hide the feeder-triggered element after a certain duration
                 gsap.to(feederTriggeredText, {
                     opacity: 0,
                     scale: 1.2,
                     duration: 0.5,
-                    delay: 2, // Display for 2 seconds
+                    delay: 2,
                     ease: 'back.in(1.7)',
                     onComplete: () => {
                         feederTriggeredText.style.display = 'none';
@@ -987,6 +762,31 @@
                 });
             }
 
+            document.addEventListener('DOMContentLoaded', async function () {
+                try {
+                    await fetchGoal();
+                    await fetchBalance();
+                    updateSatsLeft();
+
+                    // Reset messages once on page load
+                    await resetAllMessages();
+
+                    const initialProgress = Math.min(Math.max((balance / goal) * 100, 0), 100);
+                    if (initialProgress >= 100) {
+                        goalAchieved = true;
+                        isAnimating = true;
+                    }
+                } catch (error) {
+                    console.error('Error during initial fetch:', error);
+                }
+
+                initWebSocket();
+                fetchTemperature();
+
+                setInterval(fetchTemperature, FETCH_INTERVAL);
+                setInterval(updateCurrentTime, 1000);
+                setInterval(periodicallyFetchInfoMessages, INFO_MESSAGE_INTERVAL);
+            });
         })();
     </script>
 </body>
