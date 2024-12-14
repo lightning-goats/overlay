@@ -128,7 +128,7 @@
             font-weight: bold;
             line-height: 13px;
             color: #000;
-            z-index: 3; /* Above progress-fill */
+            z-index: 3;
             white-space: nowrap;
             overflow: hidden;
             pointer-events: none;
@@ -137,16 +137,15 @@
             justify-content: center;
         }
 
-        /* Scrolling Comment Overlay */
         #scrolling-comment {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 4; /* Above progress-text */
+            z-index: 4;
             overflow: hidden;
-            pointer-events: none; /* Allows interactions with underlying elements */
+            pointer-events: none;
         }
 
         #scrolling-comment .message {
@@ -154,11 +153,10 @@
             white-space: nowrap;
             font-size: 12px;
             font-weight: bold;
-            color: #000; /* Black text */
-            padding: 2px 5px;
+            color: #000;
             border-radius: 5px;
-            will-change: transform; /* Hint for browser optimization */
-            transform: translateY(-50%);
+            will-change: transform;
+            transform: translate3d(0, -50%, 0);
         }
 
         #accordion-container {
@@ -208,7 +206,7 @@
             opacity: 0;
             z-index: 6;
             display: none;
-            pointer-events: none; /* Prevent blocking interactions */
+            pointer-events: none;
         }
 
         #goal-achieved-layer {
@@ -233,7 +231,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(230, 184, 2, 0.6); /* Semi-transparent yellow */
+            background-color: rgba(230, 184, 2, 0.6);
             color: white;
             padding: 20px 40px;
             border-radius: 10px;
@@ -244,7 +242,6 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* Animations */
         @keyframes scroll {
             0% {
                 transform: translateX(100%);
@@ -257,12 +254,11 @@
     </style>
     <!-- GSAP Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
-
 </head>
 
 <body>
     <div id="container">
-        <div id="goal-achieved-layer"></div>
+        <div id="goal-achieved-layer">⚡</div>
         <div id="feeder-triggered">Feeder Triggered!</div>
         <div id="qr-code">
             <img src="images/qr.png" width='120' height='120' style="border-radius: 12px;">
@@ -272,8 +268,8 @@
         <div id="content">
             <div id="bottom-container">
                 <div id="time-temperature-container">
-                    <div id="current-time"></div>
-                    <div id="current-temperature"></div>
+                    <div id="current-time">--:--</div>
+                    <div id="current-temperature">-- °F</div>
                 </div>
                 <div id="center-container">
                     <div id="progress-container">
@@ -296,9 +292,10 @@
             const SATS_LEFT_DISPLAY_DURATION = 2000;
             const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
             const API_BASE_URL = 'https://lightning-goats.com';
-            const INFO_MESSAGE_CHANCE = 0.35;
-            const INFO_MESSAGE_INTERVAL = 60000; // 60 seconds
             const MAX_PROCESSED_HASHES = 25;
+
+            const WS_URL_PAYMENTS = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
+            const WS_URL_FASTAPI = 'wss://lightning-goats.com/ws/';
 
             const container = document.getElementById('container');
             const goalAchievedLayer = document.getElementById('goal-achieved-layer');
@@ -319,15 +316,11 @@
             let goalAchieved = false;
             let isAnimating = false;
 
-            // messageQueue now stores objects: { id: number, text: string }
             let messageQueue = [];
             let isScrolling = false;
             let reconnectInterval = RECONNECT_INTERVAL_BASE;
-            let isFetchingMessages = false;
 
             let processedPaymentHashes = new Set();
-            let processedMessages = new Set(); // Store message IDs to avoid duplicates
-            let infoMessagesDisplayed = 0;
 
             function debounce(func, wait) {
                 let timeout;
@@ -380,6 +373,10 @@
                         lastSuccessfulGoal = newGoal;
                         goal = newGoal;
                         console.log(`Fetched new goal: ${goal}`);
+                        // Optionally, update UI elements related to goal
+                        if (goal <= balance && !goalAchieved && !isAnimating) {
+                            triggerGoalAchievedEffects();
+                        }
                     } else {
                         throw new Error("Invalid trigger amount received");
                     }
@@ -396,6 +393,10 @@
                         lastSuccessfulBalance = data.balance;
                         balance = Math.round(data.balance);
                         console.log(`Fetched new balance: ${balance}`);
+                        // Check if goal is achieved after fetching new balance
+                        if (balance >= goal && !goalAchieved && !isAnimating) {
+                            triggerGoalAchievedEffects();
+                        }
                     } else {
                         balance = lastSuccessfulBalance || 0;
                         throw new Error("Invalid balance data received");
@@ -420,54 +421,9 @@
                 }
             }
 
-            async function fetchAndDisplayMessages(isInfo = false) {
-                if (isFetchingMessages) return;
-                isFetchingMessages = true;
-
-                let url = `${API_BASE_URL}/messages`;
-                if (isInfo) {
-                    url += "/info";
-                }
-
-                try {
-                    const data = await fetchData(url);
-                    console.log('Data returned from messages endpoint:', data);
-
-                    if (Array.isArray(data) && data.length > 0) {
-                        let newMessagesAdded = false;
-                        data.forEach(message => {
-                            const messageId = message.id;
-                            let processedMessage = message.content
-                                .replace(/[\r\n]+/g, ' ')
-                                .replace(/\s+/g, ' ')
-                                .replace(/https?:\/\/\S+/g, '')
-                                .trim();
-
-                            if (!processedMessages.has(messageId)) {
-                                processedMessages.add(messageId);
-                                addMessageToQueue(messageId, processedMessage, isInfo);
-                                newMessagesAdded = true;
-                            }
-                        });
-
-                        if (isInfo && newMessagesAdded) {
-                            infoMessagesDisplayed += 1;
-                            if (infoMessagesDisplayed >= 3) {
-                                resetAllMessages();
-                                infoMessagesDisplayed = 0;
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Error fetching ${isInfo ? 'info' : 'regular'} messages:`, error);
-                } finally {
-                    isFetchingMessages = false;
-                }
-            }
-
-            function addMessageToQueue(id, text, isInfo = false) {
-                messageQueue.push({ id, text });
-                console.log(`Queued message: ID=${id}, Text=${text}`);
+            function addMessageToQueue(text) {
+                messageQueue.push(text);
+                console.log(`Queued message: Text=${text}`);
                 if (!isScrolling) {
                     displayNextMessage();
                 }
@@ -478,13 +434,13 @@
                     return;
                 }
 
-                const message = messageQueue.shift(); // {id, text}
-                console.log(`Displaying message: ${message.text}`);
+                const messageText = messageQueue.shift();
+                console.log(`Displaying message: ${messageText}`);
 
                 isScrolling = true;
                 const messageSpan = document.createElement('span');
                 messageSpan.className = 'message';
-                messageSpan.innerText = message.text;
+                messageSpan.innerText = messageText;
 
                 const containerWidth = scrollingComment.offsetWidth;
                 gsap.set(messageSpan, { x: containerWidth });
@@ -500,14 +456,11 @@
                         x: -messageWidth,
                         duration: duration,
                         ease: "linear",
-                        onComplete: async () => {
+                        onComplete: () => {
                             scrollingComment.removeChild(messageSpan);
-                            console.log(`Scrolling comment removed: ${message.text}`);
+                            console.log(`Scrolling comment removed: ${messageText}`);
                             isScrolling = false;
                             progressText.style.display = 'flex';
-
-                            // Delete the message from the server now that it's displayed
-                            await deleteMessageFromServer([message.id]);
 
                             if (messageQueue.length > 0) {
                                 displayNextMessage();
@@ -517,40 +470,6 @@
                 });
             }
 
-            async function deleteMessageFromServer(ids) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/messages/bulk_delete`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ ids })
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Error deleting messages: ${response.statusText}`);
-                    }
-                    const result = await response.json();
-                    console.log(`Deleted ${result.deleted_count} messages from server.`);
-                } catch (err) {
-                    console.error('Error deleting messages from server:', err);
-                }
-            }
-
-            async function resetAllMessages() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/messages/reset`);
-                    if (!response.ok) {
-                        throw new Error(`Error resetting messages: ${response.statusText}`);
-                    }
-                    await response.json();
-                    processedMessages.clear();
-                    messageQueue = [];
-                    console.log('All messages have been reset.');
-                } catch (err) {
-                    console.error('Error resetting messages:', err);
-                }
-            }
-
             function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
                 console.log(`updateSatsLeft called with receivedAmount=${receivedAmount}, isNewPayment=${isNewPayment}`);
                 console.log(`Current balance: ${balance}, Goal: ${goal}`);
@@ -558,7 +477,11 @@
                 if (isNewPayment) {
                     displayReceivedAmount(receivedAmount);
                 } else {
-                    const satsLeft = Math.max(goal - balance, 0);
+                    // Ensure that goal and balance are numbers
+                    const currentGoal = typeof goal === 'number' ? goal : 0;
+                    const currentBalance = typeof balance === 'number' ? balance : 0;
+
+                    const satsLeft = Math.max(currentGoal - currentBalance, 0);
                     satsLeftElem.innerText = `${satsLeft} sats to go`;
                     console.log(`satsLeftElem.innerText set to: ${satsLeft} sats to go`);
                 }
@@ -567,8 +490,13 @@
             }
 
             function displayReceivedAmount(receivedAmount) {
-                satsLeftElem.innerText = `${Math.round(receivedAmount)} sats received`;
-                console.log(`Displayed received amount: ${receivedAmount} sats`);
+                if (receivedAmount > 0) {
+                    satsLeftElem.innerText = `${Math.round(receivedAmount)} sats received`;
+                    console.log(`Displayed received amount: ${receivedAmount} sats`);
+                } else {
+                    console.log(`Received amount is not positive: ${receivedAmount} sats. Skipping display.`);
+                    // Optionally, handle negative or zero received amounts differently
+                }
 
                 setTimeout(() => {
                     updateSatsLeft();
@@ -590,10 +518,7 @@
 
                 if (progress >= 100 && !goalAchieved && !isAnimating) {
                     console.log('Goal achieved! Triggering lightning and feeder effects.');
-                    goalAchieved = true;
-                    isAnimating = true;
-                    triggerLightningEffect();
-                    triggerFeederEffect();
+                    triggerGoalAchievedEffects();
                 } else if (progress < 100 && goalAchieved) {
                     console.log('Progress below 100%. Resetting goalAchieved flag.');
                     goalAchieved = false;
@@ -657,15 +582,16 @@
                             console.log(`Positive payment received: ${receivedAmount} sats`);
                             throttledUpdateSatsLeft(receivedAmount, true);
                             toggleQRCodeImage();
-
-                            setTimeout(() => {
-                                fetchAndDisplayMessages(false);
-                            }, 1000); // wait a second
                         } else if (receivedAmount < 0) {
                             console.log(`Negative payment detected: ${receivedAmount} sats.`);
                             throttledUpdateSatsLeft();
                         } else {
                             console.log('No payment amount detected (0 sats). Skipping update.');
+                        }
+
+                        // Check if new balance meets or exceeds the goal
+                        if (balance >= goal && !goalAchieved && !isAnimating) {
+                            triggerGoalAchievedEffects();
                         }
                     } catch (error) {
                         console.error('Error processing WebSocket message:', error);
@@ -681,25 +607,107 @@
                 };
             }
 
+            // Additional WebSockets
+            let wsPayments, wsFastAPI;
+            let reconnectIntervalPayments = 30000;
+            let reconnectIntervalFastAPI = 30000;
+
+            function initWebSocketPayments() {
+                wsPayments = new WebSocket(WS_URL_PAYMENTS);
+
+                wsPayments.onopen = () => {
+                    console.log('Payments WebSocket connected');
+                    reconnectIntervalPayments = 30000;
+                };
+
+                wsPayments.onmessage = (event) => {
+                    handlePaymentsWebSocketMessage(event.data);
+                };
+
+                wsPayments.onerror = (error) => {
+                    console.error('Payments WebSocket error:', error);
+                };
+
+                wsPayments.onclose = () => {
+                    console.warn(`Payments WebSocket closed. Reconnecting in ${reconnectIntervalPayments / 1000} seconds...`);
+                    setTimeout(initWebSocketPayments, reconnectIntervalPayments);
+                    reconnectIntervalPayments = Math.min(reconnectIntervalPayments * 2, 60000);
+                };
+            }
+
+            function initWebSocketFastAPI() {
+                wsFastAPI = new WebSocket(WS_URL_FASTAPI);
+
+                wsFastAPI.onopen = () => {
+                    console.log('FastAPI WebSocket connected');
+                    reconnectIntervalFastAPI = 30000;
+                };
+
+                wsFastAPI.onmessage = (event) => {
+                    handleFastAPIWebSocketMessage(event.data);
+                };
+
+                wsFastAPI.onerror = (error) => {
+                    console.error('FastAPI WebSocket error:', error);
+                };
+
+                wsFastAPI.onclose = () => {
+                    console.warn(`FastAPI WebSocket closed. Reconnecting in ${reconnectIntervalFastAPI / 1000} seconds...`);
+                    setTimeout(initWebSocketFastAPI, reconnectIntervalFastAPI);
+                    reconnectIntervalFastAPI = Math.min(reconnectIntervalFastAPI * 2, 60000);
+                };
+            }
+
+            function handlePaymentsWebSocketMessage(data) {
+                try {
+                    const parsedData = JSON.parse(data);
+                    console.log('Received from Payments WebSocket:', parsedData);
+
+                    const receivedAmount = parsedData.payment.amount / 1000;
+                    const walletBalance = parsedData.wallet_balance;
+
+                    balance = walletBalance;
+                    updateSatsLeft(receivedAmount, true);
+                    toggleQRCodeImage();
+
+                    // Check if new balance meets or exceeds the goal
+                    if (balance >= goal && !goalAchieved && !isAnimating) {
+                        triggerGoalAchievedEffects();
+                    }
+                } catch (error) {
+                    console.error('Error processing Payments WebSocket message:', error);
+                }
+            }
+
+            // No JSON parsing here: always treat as plain text
+            function handleFastAPIWebSocketMessage(data) {
+                console.log('Received from FastAPI WebSocket (text):', data);
+                addMessageToQueue(data);
+            }
+
             function toggleQRCodeImage() {
+                // Fade out the QR code
                 gsap.to(qrCode, {
                     duration: 0.125,
                     opacity: 0,
                     onComplete: () => {
                         qrCode.style.display = 'none';
                         lightningImg.style.display = 'block';
+                        // Fade in the lightning image
                         gsap.to(lightningImg, { duration: 0.125, opacity: 1 });
                         console.log('QR code hidden and lightning image displayed.');
                     }
                 });
 
                 setTimeout(() => {
+                    // Fade out the lightning image
                     gsap.to(lightningImg, {
                         duration: 0.5,
                         opacity: 0,
                         onComplete: () => {
                             lightningImg.style.display = 'none';
                             qrCode.style.display = 'block';
+                            // Fade in the QR code
                             gsap.to(qrCode, { duration: 0.5, opacity: 1 });
                             console.log('Lightning image hidden and QR code displayed.');
                         }
@@ -712,29 +720,24 @@
                 currentTimeElem.innerText = formatTime(now);
             }
 
-            function periodicallyFetchInfoMessages() {
-                if (Math.random() < INFO_MESSAGE_CHANCE) {
-                    console.log('Attempting to fetch informational messages.');
-                    fetchAndDisplayMessages(true);
-                } else {
-                    console.log('Skipping informational message fetch this interval.');
-                }
-            }
-
             function triggerLightningEffect() {
+                // Set display to 'block' and reset opacity
+                gsap.set('#lightning-effect', { display: 'block', opacity: 0 });
+
+                // Animate opacity to create the lightning effect
                 gsap.to('#lightning-effect', {
-                    display: 'block',
                     opacity: 1,
                     duration: 0.2,
                     yoyo: true,
                     repeat: 3,
                     onComplete: () => {
+                        // Fade out the lightning effect
                         gsap.to('#lightning-effect', {
                             opacity: 0,
                             duration: 0.2,
                             onComplete: () => {
+                                // Hide the element after animation
                                 document.getElementById('lightning-effect').style.display = 'none';
-                                isAnimating = false;
                                 console.log('Lightning effect completed.');
                             }
                         });
@@ -762,30 +765,64 @@
                 });
             }
 
+            function triggerGoalAchievedEffects() {
+                if (goalAchieved || isAnimating) {
+                    console.log('Goal already achieved or animation in progress.');
+                    return;
+                }
+
+                goalAchieved = true;
+                isAnimating = true;
+
+                // Display the goal achieved layer
+                gsap.set(goalAchievedLayer, { display: 'block', opacity: 0 });
+                gsap.to(goalAchievedLayer, {
+                    opacity: 1,
+                    duration: 0.5,
+                    onComplete: () => {
+                        gsap.to(goalAchievedLayer, {
+                            opacity: 0,
+                            duration: 0.5,
+                            delay: 2,
+                            onComplete: () => {
+                                goalAchievedLayer.style.display = 'none';
+                                console.log('Goal achieved layer hidden.');
+                            }
+                        });
+                    }
+                });
+
+                // Trigger lightning and feeder effects
+                triggerLightningEffect();
+                triggerFeederEffect();
+            }
+
             document.addEventListener('DOMContentLoaded', async function () {
                 try {
                     await fetchGoal();
                     await fetchBalance();
                     updateSatsLeft();
 
-                    // Reset messages once on page load
-                    await resetAllMessages();
-
                     const initialProgress = Math.min(Math.max((balance / goal) * 100, 0), 100);
                     if (initialProgress >= 100) {
-                        goalAchieved = true;
-                        isAnimating = true;
+                        triggerGoalAchievedEffects();
                     }
                 } catch (error) {
                     console.error('Error during initial fetch:', error);
                 }
 
+                // Initialize the original WebSocket
                 initWebSocket();
-                fetchTemperature();
 
+                // Initialize the additional WebSockets
+                initWebSocketPayments();
+                initWebSocketFastAPI();
+
+                fetchTemperature();
+		        fetchGoal();
+		        fetchBalance();
                 setInterval(fetchTemperature, FETCH_INTERVAL);
                 setInterval(updateCurrentTime, 1000);
-                setInterval(periodicallyFetchInfoMessages, INFO_MESSAGE_INTERVAL);
             });
         })();
     </script>
