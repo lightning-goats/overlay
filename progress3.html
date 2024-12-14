@@ -290,11 +290,10 @@
             const MAX_RECONNECT_INTERVAL = 60000; // 60 seconds
             const FETCH_INTERVAL = 16000;
             const SATS_LEFT_DISPLAY_DURATION = 2000;
-            const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
+            const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52'; // Consolidated WebSocket URL
             const API_BASE_URL = 'https://lightning-goats.com';
             const MAX_PROCESSED_HASHES = 25;
 
-            const WS_URL_PAYMENTS = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
             const WS_URL_FASTAPI = 'wss://lightning-goats.com/ws/';
 
             const container = document.getElementById('container');
@@ -373,10 +372,6 @@
                         lastSuccessfulGoal = newGoal;
                         goal = newGoal;
                         console.log(`Fetched new goal: ${goal}`);
-                        // Optionally, update UI elements related to goal
-                        if (goal <= balance && !goalAchieved && !isAnimating) {
-                            triggerGoalAchievedEffects();
-                        }
                     } else {
                         throw new Error("Invalid trigger amount received");
                     }
@@ -393,10 +388,6 @@
                         lastSuccessfulBalance = data.balance;
                         balance = Math.round(data.balance);
                         console.log(`Fetched new balance: ${balance}`);
-                        // Check if goal is achieved after fetching new balance
-                        if (balance >= goal && !goalAchieved && !isAnimating) {
-                            triggerGoalAchievedEffects();
-                        }
                     } else {
                         balance = lastSuccessfulBalance || 0;
                         throw new Error("Invalid balance data received");
@@ -557,42 +548,46 @@
                         const data = JSON.parse(event.data);
                         console.log('Parsed WebSocket message:', data);
 
-                        const receivedAmount = data.payment.amount / 1000;
-                        const walletBalance = data.wallet_balance;
-                        const paymentHash = (data.payment.payment_hash || '').toLowerCase().trim();
+                        // Handle payment messages
+                        if (data.payment && data.wallet_balance !== undefined) {
+                            const receivedAmount = data.payment.amount / 1000;
+                            const walletBalance = data.wallet_balance;
+                            const paymentHash = (data.payment.payment_hash || '').toLowerCase().trim();
 
-                        if (!paymentHash) {
-                            console.log('No payment_hash found in the message. Skipping processing.');
-                            return;
+                            if (!paymentHash) {
+                                console.log('No payment_hash found in the message. Skipping processing.');
+                                return;
+                            }
+
+                            if (processedPaymentHashes.has(paymentHash)) {
+                                console.log(`Payment with hash ${paymentHash} has already been processed. Skipping.`);
+                                return;
+                            }
+
+                            addProcessedPaymentHash(paymentHash);
+                            console.log(`Processing payment with hash: ${paymentHash}`);
+
+                            balance = walletBalance;
+                            lastSuccessfulBalance = balance;
+                            console.log(`WebSocket updated balance: ${balance} sats`);
+
+                            if (receivedAmount > 0) {
+                                console.log(`Positive payment received: ${receivedAmount} sats`);
+                                throttledUpdateSatsLeft(receivedAmount, true);
+                                toggleQRCodeImage();
+                            } else if (receivedAmount < 0) {
+                                console.log(`Negative payment detected: ${receivedAmount} sats.`);
+                                throttledUpdateSatsLeft();
+                            } else {
+                                console.log('No payment amount detected (0 sats). Skipping update.');
+                            }
                         }
 
-                        if (processedPaymentHashes.has(paymentHash)) {
-                            console.log(`Payment with hash ${paymentHash} has already been processed. Skipping.`);
-                            return;
+                        // Handle other message types if necessary
+                        if (data.message) {
+                            addMessageToQueue(data.message);
                         }
 
-                        addProcessedPaymentHash(paymentHash);
-                        console.log(`Processing payment with hash: ${paymentHash}`);
-
-                        balance = walletBalance;
-                        lastSuccessfulBalance = balance;
-                        console.log(`WebSocket updated balance: ${balance} sats`);
-
-                        if (receivedAmount > 0) {
-                            console.log(`Positive payment received: ${receivedAmount} sats`);
-                            throttledUpdateSatsLeft(receivedAmount, true);
-                            toggleQRCodeImage();
-                        } else if (receivedAmount < 0) {
-                            console.log(`Negative payment detected: ${receivedAmount} sats.`);
-                            throttledUpdateSatsLeft();
-                        } else {
-                            console.log('No payment amount detected (0 sats). Skipping update.');
-                        }
-
-                        // Check if new balance meets or exceeds the goal
-                        if (balance >= goal && !goalAchieved && !isAnimating) {
-                            triggerGoalAchievedEffects();
-                        }
                     } catch (error) {
                         console.error('Error processing WebSocket message:', error);
                     }
@@ -607,33 +602,11 @@
                 };
             }
 
-            // Additional WebSockets
-            let wsPayments, wsFastAPI;
-            let reconnectIntervalPayments = 30000;
+            // Removed: Additional WebSocket for Payments (wsPayments)
+
+            // Initialize FastAPI WebSocket separately if needed
+            let wsFastAPI;
             let reconnectIntervalFastAPI = 30000;
-
-            function initWebSocketPayments() {
-                wsPayments = new WebSocket(WS_URL_PAYMENTS);
-
-                wsPayments.onopen = () => {
-                    console.log('Payments WebSocket connected');
-                    reconnectIntervalPayments = 30000;
-                };
-
-                wsPayments.onmessage = (event) => {
-                    handlePaymentsWebSocketMessage(event.data);
-                };
-
-                wsPayments.onerror = (error) => {
-                    console.error('Payments WebSocket error:', error);
-                };
-
-                wsPayments.onclose = () => {
-                    console.warn(`Payments WebSocket closed. Reconnecting in ${reconnectIntervalPayments / 1000} seconds...`);
-                    setTimeout(initWebSocketPayments, reconnectIntervalPayments);
-                    reconnectIntervalPayments = Math.min(reconnectIntervalPayments * 2, 60000);
-                };
-            }
 
             function initWebSocketFastAPI() {
                 wsFastAPI = new WebSocket(WS_URL_FASTAPI);
@@ -658,28 +631,6 @@
                 };
             }
 
-            function handlePaymentsWebSocketMessage(data) {
-                try {
-                    const parsedData = JSON.parse(data);
-                    console.log('Received from Payments WebSocket:', parsedData);
-
-                    const receivedAmount = parsedData.payment.amount / 1000;
-                    const walletBalance = parsedData.wallet_balance;
-
-                    balance = walletBalance;
-                    updateSatsLeft(receivedAmount, true);
-                    toggleQRCodeImage();
-
-                    // Check if new balance meets or exceeds the goal
-                    if (balance >= goal && !goalAchieved && !isAnimating) {
-                        triggerGoalAchievedEffects();
-                    }
-                } catch (error) {
-                    console.error('Error processing Payments WebSocket message:', error);
-                }
-            }
-
-            // No JSON parsing here: always treat as plain text
             function handleFastAPIWebSocketMessage(data) {
                 console.log('Received from FastAPI WebSocket (text):', data);
                 addMessageToQueue(data);
@@ -761,6 +712,7 @@
                     onComplete: () => {
                         feederTriggeredText.style.display = 'none';
                         console.log('Feeder effect completed.');
+                        isAnimating = false; // Reset the animating flag
                     }
                 });
             }
@@ -787,6 +739,7 @@
                             onComplete: () => {
                                 goalAchievedLayer.style.display = 'none';
                                 console.log('Goal achieved layer hidden.');
+                                isAnimating = false; // Reset the animating flag
                             }
                         });
                     }
@@ -803,6 +756,17 @@
                     await fetchBalance();
                     updateSatsLeft();
 
+                    // Initialize the single WebSocket for payments and general messages
+                    initWebSocket();
+
+                    // Initialize the FastAPI WebSocket
+                    initWebSocketFastAPI();
+
+                    fetchTemperature();
+                    setInterval(fetchTemperature, FETCH_INTERVAL);
+                    setInterval(updateCurrentTime, 1000);
+
+                    // After initial data fetch and WebSocket initialization, check if goal is already achieved
                     const initialProgress = Math.min(Math.max((balance / goal) * 100, 0), 100);
                     if (initialProgress >= 100) {
                         triggerGoalAchievedEffects();
@@ -810,19 +774,6 @@
                 } catch (error) {
                     console.error('Error during initial fetch:', error);
                 }
-
-                // Initialize the original WebSocket
-                initWebSocket();
-
-                // Initialize the additional WebSockets
-                initWebSocketPayments();
-                initWebSocketFastAPI();
-
-                fetchTemperature();
-		        fetchGoal();
-		        fetchBalance();
-                setInterval(fetchTemperature, FETCH_INTERVAL);
-                setInterval(updateCurrentTime, 1000);
             });
         })();
     </script>
