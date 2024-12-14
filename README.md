@@ -14,5 +14,5 @@ This is an HTML overlay designed to be used with OBS Studio for the Lightning Go
 - HTML5
 - CSS3
 - JavaScript
-- WebSocket API for real-time updates
+- WebSockets for real-time updates
 
