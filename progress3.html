@@ -15,40 +15,42 @@
 
         #container {
             position: absolute;
-            width: 1280px;
-            height: 720px;
+            width: 1920px; /* scaled from 1280px */
+            height: 1080px; /* scaled from 720px */
             margin: auto;
             top: 0;
             left: 0;
         }
 
         #qr-code {
-            position: absolute;
-            top: 2px;
-            right: 5px;
-            background-color: white;
-            width: 120px;
-            height: 120px;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            z-index: 3;
-        }
+	    position: absolute;
+	    top: 3px; /* scaled from 2px */
+	    right: 8px; /* scaled from 5px */
+	    background-color: white;
+	    width: 180px; /* scaled from 120px */
+	    height: 180px; /* scaled from 120px */
+	    border-top-left-radius: 18px; /* scaled from 12px */
+	    border-top-right-radius: 18px; /* scaled from 12px */
+	    z-index: 3;
+	}
+
 
         #sats_left {
-            position: absolute;
-            top: 121px;
-            right: 5px;
-            width: 120px;
-            padding-bottom: 3px;
-            text-align: center;
-            font-size: 12px;
-            font-weight: bold;
-            font-family: 'Arial', sans-serif;
-            background-color: white;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            z-index: 3;
-        }
+	    position: absolute;
+	    top: 182px; /* scaled from 121px */
+	    right: 8px; /* scaled from 5px */
+	    width: 180px; /* scaled from 120px */
+	    padding-bottom: 5px; /* scaled from 3px */
+	    text-align: center;
+	    font-size: 18px; /* scaled from 12px */
+	    font-weight: bold;
+	    font-family: 'Arial', sans-serif;
+	    background-color: white;
+	    border-bottom-left-radius: 18px; /* scaled from 12px */
+	    border-bottom-right-radius: 18px; /* scaled from 12px */
+	    z-index: 3;
+	}
+
 
         #content {
             width: 100%;
@@ -62,8 +64,8 @@
             display: flex;
             align-items: center;
             background-color: #e33502;
-            border-radius: 12px;
-            padding: 3px 6px;
+            border-radius: 18px; /* scaled from 12px */
+            padding: 5px 9px; /* scaled from 3px 6px */
             position: absolute;
             bottom: 0;
             left: 0;
@@ -77,9 +79,9 @@
             display: flex;
             align-items: center;
             background-color: #e33502;
-            border-radius: 7px;
-            padding: 3px 6px;
-            font-size: 12px;
+            border-radius: 11px; /* scaled from 7px */
+            padding: 5px 9px; /* scaled from 3px 6px */
+            font-size: 18px; /* scaled from 12px */
             font-weight: bold;
             font-family: 'Arial', sans-serif;
             color: white;
@@ -88,7 +90,7 @@
 
         #current-time,
         #current-temperature {
-            margin-right: 5px;
+            margin-right: 8px; /* scaled from 5px */
         }
 
         #center-container {
@@ -101,9 +103,9 @@
         #progress-container {
             position: relative;
             width: 99%;
-            height: 13px;
+            height: 20px; /* scaled from 13px */
             background-color: #e6e6e6;
-            border-radius: 7px;
+            border-radius: 11px; /* scaled from 7px */
             overflow: hidden;
             z-index: 2;
         }
@@ -111,7 +113,7 @@
         #progress-fill {
             height: 100%;
             background-color: #e6b800;
-            border-radius: 7px;
+            border-radius: 11px; /* scaled from 7px */
             width: 0%;
             z-index: 1;
         }
@@ -123,10 +125,10 @@
             width: 100%;
             height: 100%;
             text-align: center;
-            font-size: 10px;
+            font-size: 15px; /* scaled from 10px */
             font-family: 'Arial', sans-serif;
             font-weight: bold;
-            line-height: 13px;
+            line-height: 20px; /* scaled from 13px */
             color: #000;
             z-index: 3;
             white-space: nowrap;
@@ -151,20 +153,20 @@
         #scrolling-comment .message {
             position: absolute;
             white-space: nowrap;
-            font-size: 12px;
+            font-size: 18px; /* scaled from 12px */
             font-weight: bold;
             color: #000;
-            border-radius: 5px;
+            border-radius: 8px; /* scaled from 5px */
             will-change: transform;
             transform: translate3d(0, -50%, 0);
         }
 
         #accordion-container {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            bottom: 3px;
-            height: 120px;
+            top: 5px; /* scaled from 3px */
+            left: 5px; /* scaled from 3px */
+            bottom: 5px; /* scaled from 3px */
+            height: 180px; /* scaled from 120px */
             background-color: transparent;
             display: flex;
             overflow: hidden;
@@ -175,8 +177,8 @@
 
         .accordion-item {
             background-color: #e33502;
-            width: 120px;
-            height: 120px;
+            width: 180px; /* scaled from 120px */
+            height: 180px; /* scaled from 120px */
             position: relative;
         }
 
@@ -190,8 +192,8 @@
         }
 
         .accordion-content img {
-            height: 110px;
-            width: 110px;
+            height: 165px; /* scaled from 110px */
+            width: 165px; /* scaled from 110px */
             display: block;
             margin: auto;
         }
@@ -209,23 +211,6 @@
             pointer-events: none;
         }
 
-        #goal-achieved-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(230, 184, 0, 0.5);
-            z-index: 5;
-            opacity: 0;
-            display: none;
-            text-align: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: white;
-            line-height: 720px;
-        }
-
         #feeder-triggered {
             position: absolute;
             top: 50%;
@@ -233,9 +218,9 @@
             transform: translate(-50%, -50%);
             background-color: rgba(230, 184, 2, 0.6);
             color: white;
-            padding: 20px 40px;
-            border-radius: 10px;
-            font-size: 24px;
+            padding: 30px 60px; /* scaled from 20px 40px */
+            border-radius: 15px; /* scaled from 10px */
+            font-size: 36px; /* scaled from 24px */
             font-weight: bold;
             display: none;
             z-index: 7;
@@ -258,11 +243,11 @@
 
 <body>
     <div id="container">
-        <div id="goal-achieved-layer">⚡</div>
+        <!-- Removed: <div id="goal-achieved-layer">⚡</div> -->
         <div id="feeder-triggered">Feeder Triggered!</div>
         <div id="qr-code">
-            <img src="images/qr.png" width='120' height='120' style="border-radius: 12px;">
-            <img id="lightning-img" src="images/lightning.png" width='117' height='117' style="border-radius: 12px; display: none;">
+            <img src="images/qr.png" width='180' height='180' style="border-radius: 18px;">
+            <img id="lightning-img" src="images/lightning.png" width='177' height='177' style="border-radius: 18px; display: none;">
         </div>
         <div id="sats_left">0 sats to go</div>
         <div id="content">
@@ -290,14 +275,13 @@
             const MAX_RECONNECT_INTERVAL = 60000; // 60 seconds
             const FETCH_INTERVAL = 16000;
             const SATS_LEFT_DISPLAY_DURATION = 2000;
-            const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52'; // Consolidated WebSocket URL
+            const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
             const API_BASE_URL = 'https://lightning-goats.com';
             const MAX_PROCESSED_HASHES = 25;
 
             const WS_URL_FASTAPI = 'wss://lightning-goats.com/ws/';
 
             const container = document.getElementById('container');
-            const goalAchievedLayer = document.getElementById('goal-achieved-layer');
             const feederTriggeredText = document.getElementById('feeder-triggered');
             const qrCode = document.querySelector('#qr-code img:first-child');
             const lightningImg = document.getElementById('lightning-img');
@@ -312,7 +296,6 @@
             let goal = 0;
             let lastSuccessfulGoal = 0;
             let lastSuccessfulBalance = 0;
-            let goalAchieved = false;
             let isAnimating = false;
 
             let messageQueue = [];
@@ -359,7 +342,6 @@
                     }
                     return await response.text();
                 } catch (error) {
-                    console.error(error);
                     throw error;
                 }
             }
@@ -371,13 +353,11 @@
                     if (!isNaN(newGoal)) {
                         lastSuccessfulGoal = newGoal;
                         goal = newGoal;
-                        console.log(`Fetched new goal: ${goal}`);
                     } else {
                         throw new Error("Invalid trigger amount received");
                     }
                 } catch (error) {
                     goal = lastSuccessfulGoal;
-                    console.error('Error fetching goal:', error);
                 }
             }
 
@@ -387,14 +367,12 @@
                     if (data && typeof data.balance === 'number' && data.balance >= 0) {
                         lastSuccessfulBalance = data.balance;
                         balance = Math.round(data.balance);
-                        console.log(`Fetched new balance: ${balance}`);
                     } else {
                         balance = lastSuccessfulBalance || 0;
                         throw new Error("Invalid balance data received");
                     }
                 } catch (error) {
                     balance = lastSuccessfulBalance || 0;
-                    console.error('Error fetching balance:', error);
                 }
             }
 
@@ -405,16 +383,13 @@
                     if (temp !== undefined) {
                         const temperature = Math.round(temp);
                         currentTempElem.innerText = `${temperature} °F`;
-                        console.log(`Fetched temperature: ${temperature} °F`);
                     }
                 } catch (error) {
-                    console.error('Error fetching temperature:', error);
                 }
             }
 
             function addMessageToQueue(text) {
                 messageQueue.push(text);
-                console.log(`Queued message: Text=${text}`);
                 if (!isScrolling) {
                     displayNextMessage();
                 }
@@ -426,7 +401,6 @@
                 }
 
                 const messageText = messageQueue.shift();
-                console.log(`Displaying message: ${messageText}`);
 
                 isScrolling = true;
                 const messageSpan = document.createElement('span');
@@ -441,7 +415,7 @@
 
                 requestAnimationFrame(() => {
                     const messageWidth = messageSpan.offsetWidth;
-                    const duration = (containerWidth + messageWidth) / 100;
+                    const duration = (containerWidth + messageWidth) / 150;
 
                     gsap.to(messageSpan, {
                         x: -messageWidth,
@@ -449,7 +423,6 @@
                         ease: "linear",
                         onComplete: () => {
                             scrollingComment.removeChild(messageSpan);
-                            console.log(`Scrolling comment removed: ${messageText}`);
                             isScrolling = false;
                             progressText.style.display = 'flex';
 
@@ -462,57 +435,39 @@
             }
 
             function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
-                console.log(`updateSatsLeft called with receivedAmount=${receivedAmount}, isNewPayment=${isNewPayment}`);
-                console.log(`Current balance: ${balance}, Goal: ${goal}`);
-
                 if (isNewPayment) {
                     displayReceivedAmount(receivedAmount);
                 } else {
-                    // Ensure that goal and balance are numbers
                     const currentGoal = typeof goal === 'number' ? goal : 0;
                     const currentBalance = typeof balance === 'number' ? balance : 0;
-
                     const satsLeft = Math.max(currentGoal - currentBalance, 0);
                     satsLeftElem.innerText = `${satsLeft} sats to go`;
-                    console.log(`satsLeftElem.innerText set to: ${satsLeft} sats to go`);
                 }
-
                 debouncedUpdateProgressBar();
             }
 
             function displayReceivedAmount(receivedAmount) {
                 if (receivedAmount > 0) {
                     satsLeftElem.innerText = `${Math.round(receivedAmount)} sats received`;
-                    console.log(`Displayed received amount: ${receivedAmount} sats`);
-                } else {
-                    console.log(`Received amount is not positive: ${receivedAmount} sats. Skipping display.`);
-                    // Optionally, handle negative or zero received amounts differently
                 }
-
                 setTimeout(() => {
                     updateSatsLeft();
-                    console.log('Reset sats_left after display duration.');
                 }, SATS_LEFT_DISPLAY_DURATION);
             }
 
             function updateProgressBar() {
                 if (goal === 0) return;
-
                 const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
                 gsap.to(progressFill, { width: `${progress}%`, duration: 2 });
-                console.log(`Progress updated to: ${progress}%`);
 
                 if (!isScrolling) {
                     progressText.innerText = `${Math.round(progress)}%`;
-                    console.log(`Progress text updated to: ${Math.round(progress)}%`);
                 }
 
-                if (progress >= 100 && !goalAchieved && !isAnimating) {
-                    console.log('Goal achieved! Triggering lightning and feeder effects.');
-                    triggerGoalAchievedEffects();
-                } else if (progress < 100 && goalAchieved) {
-                    console.log('Progress below 100%. Resetting goalAchieved flag.');
-                    goalAchieved = false;
+                if (progress >= 100 && !isAnimating) {
+                    triggerLightningEffect();
+                    triggerFeederEffect();
+                    isAnimating = true; 
                 }
             }
 
@@ -520,10 +475,8 @@
                 if (processedPaymentHashes.size >= MAX_PROCESSED_HASHES) {
                     const firstHash = processedPaymentHashes.values().next().value;
                     processedPaymentHashes.delete(firstHash);
-                    console.log(`Removed oldest payment hash: ${firstHash}`);
                 }
                 processedPaymentHashes.add(hash);
-                console.log(`Added payment hash: ${hash}`);
             }
 
             let ws;
@@ -533,68 +486,50 @@
                 ws = new WebSocket(WS_URL);
 
                 ws.onopen = () => {
-                    console.log('WebSocket connected');
                     currentReconnectInterval = RECONNECT_INTERVAL_BASE;
                 };
 
-                ws.onerror = (error) => {
-                    console.error('WebSocket error:', error);
+                ws.onerror = () => {
                 };
 
                 ws.onmessage = async (event) => {
-                    console.log('WebSocket message received:', event.data);
-
                     try {
                         const data = JSON.parse(event.data);
-                        console.log('Parsed WebSocket message:', data);
 
-                        // Handle payment messages
                         if (data.payment && data.wallet_balance !== undefined) {
                             const receivedAmount = data.payment.amount / 1000;
                             const walletBalance = data.wallet_balance;
                             const paymentHash = (data.payment.payment_hash || '').toLowerCase().trim();
 
                             if (!paymentHash) {
-                                console.log('No payment_hash found in the message. Skipping processing.');
                                 return;
                             }
 
                             if (processedPaymentHashes.has(paymentHash)) {
-                                console.log(`Payment with hash ${paymentHash} has already been processed. Skipping.`);
                                 return;
                             }
 
                             addProcessedPaymentHash(paymentHash);
-                            console.log(`Processing payment with hash: ${paymentHash}`);
-
                             balance = walletBalance;
                             lastSuccessfulBalance = balance;
-                            console.log(`WebSocket updated balance: ${balance} sats`);
 
                             if (receivedAmount > 0) {
-                                console.log(`Positive payment received: ${receivedAmount} sats`);
                                 throttledUpdateSatsLeft(receivedAmount, true);
                                 toggleQRCodeImage();
                             } else if (receivedAmount < 0) {
-                                console.log(`Negative payment detected: ${receivedAmount} sats.`);
                                 throttledUpdateSatsLeft();
-                            } else {
-                                console.log('No payment amount detected (0 sats). Skipping update.');
                             }
                         }
 
-                        // Handle other message types if necessary
                         if (data.message) {
                             addMessageToQueue(data.message);
                         }
 
                     } catch (error) {
-                        console.error('Error processing WebSocket message:', error);
                     }
                 };
 
-                ws.onclose = (event) => {
-                    console.warn(`WebSocket closed: ${event.reason}. Reconnecting in ${currentReconnectInterval / 1000} seconds...`);
+                ws.onclose = () => {
                     setTimeout(() => {
                         currentReconnectInterval = Math.min(currentReconnectInterval * 2, MAX_RECONNECT_INTERVAL);
                         initWebSocket();
@@ -602,9 +537,6 @@
                 };
             }
 
-            // Removed: Additional WebSocket for Payments (wsPayments)
-
-            // Initialize FastAPI WebSocket separately if needed
             let wsFastAPI;
             let reconnectIntervalFastAPI = 30000;
 
@@ -612,7 +544,6 @@
                 wsFastAPI = new WebSocket(WS_URL_FASTAPI);
 
                 wsFastAPI.onopen = () => {
-                    console.log('FastAPI WebSocket connected');
                     reconnectIntervalFastAPI = 30000;
                 };
 
@@ -620,47 +551,38 @@
                     handleFastAPIWebSocketMessage(event.data);
                 };
 
-                wsFastAPI.onerror = (error) => {
-                    console.error('FastAPI WebSocket error:', error);
+                wsFastAPI.onerror = () => {
                 };
 
                 wsFastAPI.onclose = () => {
-                    console.warn(`FastAPI WebSocket closed. Reconnecting in ${reconnectIntervalFastAPI / 1000} seconds...`);
                     setTimeout(initWebSocketFastAPI, reconnectIntervalFastAPI);
                     reconnectIntervalFastAPI = Math.min(reconnectIntervalFastAPI * 2, 60000);
                 };
             }
 
             function handleFastAPIWebSocketMessage(data) {
-                console.log('Received from FastAPI WebSocket (text):', data);
                 addMessageToQueue(data);
             }
 
             function toggleQRCodeImage() {
-                // Fade out the QR code
                 gsap.to(qrCode, {
                     duration: 0.125,
                     opacity: 0,
                     onComplete: () => {
                         qrCode.style.display = 'none';
                         lightningImg.style.display = 'block';
-                        // Fade in the lightning image
                         gsap.to(lightningImg, { duration: 0.125, opacity: 1 });
-                        console.log('QR code hidden and lightning image displayed.');
                     }
                 });
 
                 setTimeout(() => {
-                    // Fade out the lightning image
                     gsap.to(lightningImg, {
                         duration: 0.5,
                         opacity: 0,
                         onComplete: () => {
                             lightningImg.style.display = 'none';
                             qrCode.style.display = 'block';
-                            // Fade in the QR code
                             gsap.to(qrCode, { duration: 0.5, opacity: 1 });
-                            console.log('Lightning image hidden and QR code displayed.');
                         }
                     });
                 }, SATS_LEFT_DISPLAY_DURATION);
@@ -672,24 +594,19 @@
             }
 
             function triggerLightningEffect() {
-                // Set display to 'block' and reset opacity
                 gsap.set('#lightning-effect', { display: 'block', opacity: 0 });
 
-                // Animate opacity to create the lightning effect
                 gsap.to('#lightning-effect', {
                     opacity: 1,
                     duration: 0.2,
                     yoyo: true,
                     repeat: 3,
                     onComplete: () => {
-                        // Fade out the lightning effect
                         gsap.to('#lightning-effect', {
                             opacity: 0,
                             duration: 0.2,
                             onComplete: () => {
-                                // Hide the element after animation
                                 document.getElementById('lightning-effect').style.display = 'none';
-                                console.log('Lightning effect completed.');
                             }
                         });
                     }
@@ -697,7 +614,6 @@
             }
 
             function triggerFeederEffect() {
-                console.log('Triggering feeder effect.');
                 feederTriggeredText.style.display = 'block';
                 gsap.fromTo(feederTriggeredText,
                     { opacity: 0, scale: 0.8 },
@@ -711,43 +627,9 @@
                     ease: 'back.in(1.7)',
                     onComplete: () => {
                         feederTriggeredText.style.display = 'none';
-                        console.log('Feeder effect completed.');
-                        isAnimating = false; // Reset the animating flag
+                        isAnimating = false;
                     }
                 });
-            }
-
-            function triggerGoalAchievedEffects() {
-                if (goalAchieved || isAnimating) {
-                    console.log('Goal already achieved or animation in progress.');
-                    return;
-                }
-
-                goalAchieved = true;
-                isAnimating = true;
-
-                // Display the goal achieved layer
-                gsap.set(goalAchievedLayer, { display: 'block', opacity: 0 });
-                gsap.to(goalAchievedLayer, {
-                    opacity: 1,
-                    duration: 0.5,
-                    onComplete: () => {
-                        gsap.to(goalAchievedLayer, {
-                            opacity: 0,
-                            duration: 0.5,
-                            delay: 2,
-                            onComplete: () => {
-                                goalAchievedLayer.style.display = 'none';
-                                console.log('Goal achieved layer hidden.');
-                                isAnimating = false; // Reset the animating flag
-                            }
-                        });
-                    }
-                });
-
-                // Trigger lightning and feeder effects
-                triggerLightningEffect();
-                triggerFeederEffect();
             }
 
             document.addEventListener('DOMContentLoaded', async function () {
@@ -756,23 +638,15 @@
                     await fetchBalance();
                     updateSatsLeft();
 
-                    // Initialize the single WebSocket for payments and general messages
                     initWebSocket();
-
-                    // Initialize the FastAPI WebSocket
                     initWebSocketFastAPI();
 
                     fetchTemperature();
                     setInterval(fetchTemperature, FETCH_INTERVAL);
                     setInterval(updateCurrentTime, 1000);
 
-                    // After initial data fetch and WebSocket initialization, check if goal is already achieved
                     const initialProgress = Math.min(Math.max((balance / goal) * 100, 0), 100);
-                    if (initialProgress >= 100) {
-                        triggerGoalAchievedEffects();
-                    }
                 } catch (error) {
-                    console.error('Error during initial fetch:', error);
                 }
             });
         })();
