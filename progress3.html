@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,44 +10,54 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Arial', sans-serif;
+      font-family: 'Arial', sans-serif; 
     }
     
     #container {
       position: absolute;
-      width: 1920px; /* scaled from 1280px */
-      height: 1080px; /* scaled from 720px */
+      width: 1920px; 
+      height: 1080px; 
       margin: auto;
       top: 0;
       left: 0;
     }
     
-    /* QR-code container with all rounded corners */
     #qr-code {
       position: absolute;
-      top: 3px; /* scaled from 2px */
-      right: 8px; /* scaled from 5px */
+      top: 3px; 
+      right: 8px; 
       background-color: white;
-      width: 180px; /* scaled from 120px */
-      height: 180px; /* scaled from 120px */
-      border-radius: 18px; /* all corners rounded */
+      width: 180px; 
+      height: 180px; 
+      border-radius: 18px; 
       z-index: 3;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    #qr-code:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     }
     
     #sats-received-overlay {
       position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 188px; 
+      right: 8px;   
+      width: 180px; 
+      text-align: center; 
       font-size: 18px;
       font-weight: bold;
       font-family: 'Arial', sans-serif;
       color: black;
-      background-color: transparent;
+      background-color: rgba(255, 255, 255, 0.95); 
+      padding: 5px 10px;
+      border-radius: 8px;
       pointer-events: none;
-      z-index: 4;
+      z-index: 4; 
       opacity: 0;
       white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-sizing: border-box; 
     }
     
     #content {
@@ -57,10 +68,9 @@
       flex-direction: column;
     }
     
-    /* Top-left container for feedings, spots remaining and sats_left all in one row */
     #top-left-container {
       display: flex;
-      flex-direction: row; /* place all children in one row */
+      flex-direction: row; 
       align-items: center;
       background-color: #000000;
       border-radius: 18px;
@@ -70,9 +80,9 @@
       left: 5px;
       box-sizing: border-box;
       z-index: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
-    /* Individual top-left elements */
     #goat-feedings,
     #spots-remaining,
     #sats_left {
@@ -81,12 +91,14 @@
       font-size: 18px;
       font-family: 'Arial', sans-serif;
       margin-right: 10px;
+      transition: color 0.5s ease-out; 
     }
     
     #bottom-container {
       display: flex;
       align-items: center;
-      background-color: #e33502;
+      background-color: #e33502; 
+      background-image: linear-gradient(to bottom, #e33502, #c82a00);
       border-radius: 18px;
       padding: 5px 9px;
       position: absolute;
@@ -95,6 +107,7 @@
       width: 100%;
       box-sizing: border-box;
       z-index: 0;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
     }
     
     #time-temperature-container {
@@ -116,7 +129,6 @@
       margin-right: 8px;
     }
     
-    /* Wallet balance display (if used) */
     #wallet-balance {
       margin-left: 8px;
     }
@@ -132,137 +144,174 @@
       position: relative;
       width: 99%;
       height: 20px;
-      background-color: #e6e6e6;
+      background-color: #d0d0d0; 
       border-radius: 11px;
       overflow: hidden;
       z-index: 2;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.25); 
     }
     
     #progress-fill {
       height: 100%;
-      background-color: #e6b800;
+      background-color: #e6b800; 
+      background-image: linear-gradient(
+        -45deg, 
+        rgba(230,184,0,1) 25%,  
+        rgba(235,195,20,1) 25%,  
+        rgba(235,195,20,1) 50%,
+        rgba(230,184,0,1) 50%,
+        rgba(230,184,0,1) 75%,
+        rgba(235,195,20,1) 75%,
+        rgba(235,195,20,1) 100%
+      );
+      background-size: 20px 20px; 
       border-radius: 11px;
       width: 0%;
-      z-index: 1;
+      z-index: 1; 
+      position: relative; 
     }
-    
-    #progress-text {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      font-size: 15px;
-      font-family: 'Arial', sans-serif;
-      font-weight: bold;
-      line-height: 20px;
-      color: #000;
-      z-index: 3;
-      white-space: nowrap;
-      overflow: hidden;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+
+    #progress-fill.is-filling { 
+        animation: pulseFill 1.5s infinite ease-in-out, progressBarFlow 1.8s linear infinite; 
     }
-    
+    @keyframes pulseFill {
+        0%, 100% { filter: brightness(100%); }
+        50% { filter: brightness(110%); } 
+    }
+    @keyframes progressBarFlow {
+      0% { background-position: 0 0; }
+      100% { background-position: 20px 0; } 
+    }
+
+
+    #progress-fill.shine-effect::after { 
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -150%; 
+        width: 100%; 
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); 
+        animation: shine 0.75s forwards;
+        border-radius: 11px; 
+    }
+    @keyframes shine {
+        to { left: 150%; } 
+    }
+
+    #progress-drainer { 
+        position: absolute;
+        top: 0;
+        right: 0; 
+        width: 0%; 
+        height: 100%;
+        background-color: #d0d0d0; 
+        border-radius: 11px;
+        z-index: 2; 
+        display: none; 
+    }
+        
     #scrolling-comment {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
+      width: 100%; 
       height: 100%;
-      z-index: 4;
+      z-index: 3; 
       overflow: hidden;
       pointer-events: none;
     }
     
     #scrolling-comment .message {
-      position: absolute;
+      position: absolute; 
       white-space: nowrap;
       font-size: 18px;
       font-weight: bold;
-      color: #000;
-      border-radius: 8px;
+      color: #000; 
       will-change: transform;
-      transform: translate3d(0, -50%, 0);
+      background-color: rgba(245, 245, 245, 0.75); 
+      padding: 4px 10px; 
+      border-radius: 11px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15); 
     }
     
-    /* Vertical accordion container for goat images */
     #accordion-container {
       position: absolute;
-      top: 50px; /* Position at top area of screen */
-      left: 8px; /* Position at left edge instead of right */
-      width: auto; /* Auto width to accommodate horizontal layout */
-      height: auto; /* Auto height */
+      top: 50px; 
+      left: 8px; 
+      width: auto; 
+      height: auto; 
       background-color: transparent;
       display: flex;
-      flex-direction: row;  /* Horizontal layout instead of column */
-      overflow: hidden;
+      flex-direction: row;  
+      overflow: visible; 
       z-index: 3;
       opacity: 0;
-      transform: translateX(-100%); /* Move off-screen to the left for animation */
+      transform: translateX(-100%); 
     }
     
     .accordion-item {
       background-color: #000000;
-      width: 130px; /* Narrower to fit more items */
-      height: 190px; /* Increased height to accommodate all content */
+      width: 130px; 
+      height: 190px; 
       position: relative;
-      margin-right: 10px; /* Add spacing between items */
-      border-radius: 18px; /* Add rounded corners to items */
-      overflow: hidden; /* Ensure content stays within rounded corners */
+      margin-right: 10px; 
+      border-radius: 18px; 
+      overflow: hidden; 
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      opacity: 0; 
     }
     
-    /* All accordion items use the same height */
     .accordion-item.user-profile {
-      height: 190px; /* Match regular item height */
+      height: 190px; 
     }
     
     .accordion-content {
       background-color: #000000;
       height: 100%;
       display: flex;
-      flex-direction: column; /* Changed to column to stack image and text */
-      justify-content: flex-start; /* Changed from center to top-align content */
-      opacity: 0;
-      padding: 10px 5px; /* Add some extra padding at top/bottom */
+      flex-direction: column; 
+      justify-content: flex-start; 
+      opacity: 1; 
+      padding: 10px 5px; 
       align-items: center;
-      border-radius: 18px; /* Match item border radius */
+      border-radius: 18px; 
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; 
+    }
+
+    .accordion-item:hover .accordion-content {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 12px rgba(255, 219, 88, 0.4); 
     }
     
     .accordion-content img {
       height: 100px;
       width: 100px;
       display: block;
-      margin-top: 10px; /* Add some space at the top */
-      margin-bottom: 8px; /* Space between image and text */
-      border-radius: 50%; /* Makes the image circular */
-      object-fit: cover; /* Ensures the image covers the area without distortion */
-      border: 2px solid white; /* Add a white border around the circular image */
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Add subtle shadow */
+      margin-top: 10px; 
+      margin-bottom: 8px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      border: 2px solid white; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
     }
     
-    /* Optional: Add a subtle breathing animation to highlight user profiles */
     @keyframes breathe {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
     
-    /* Only apply breathing effect to the newest member */
     [data-newest="true"] .accordion-content img {
       animation: breathe 3s infinite ease-in-out;
     }
 
-    /* Enhanced user profile styling */
     .user-profile-container {
       display: flex;
-      flex-direction: column; /* Changed to column to stack image and text */
+      flex-direction: column; 
       align-items: center;
-      justify-content: flex-start; /* Changed to align content to top */
-      text-align: center; /* Center text under image */
+      justify-content: flex-start; 
+      text-align: center; 
       width: 100%;
       padding: 0 5px;
       box-sizing: border-box;
@@ -272,9 +321,9 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* Align text to top */
+      justify-content: flex-start; 
       align-items: center;
-      margin-top: 5px; /* Space between image and text */
+      margin-top: 5px; 
     }
     
     .user-profile-name {
@@ -297,29 +346,26 @@
       text-overflow: ellipsis;
       max-width: 120px;
       white-space: nowrap;
-      display: block; /* Ensure visibility */
+      display: block; 
       text-align: center;
     }
     
-    /* Add styling for zap amount display */
     .user-profile-zap {
       color: #ffdb58;
       font-weight: bold;
       font-size: 12px;
-      font-weight: bold;
       margin-top: 2px;
       display: block;
       text-align: center;
     }
 
-    /* Lightning effect styling */
     #lightning-effect {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: #e6b800;
+      background-color: #F0F8FF; 
       z-index: 1000;
       pointer-events: none;
       display: none;
@@ -327,20 +373,26 @@
     }
 
     #feeder-triggered {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(230, 184, 2, 0.6);
-            color: white;
-            padding: 30px 60px; /* scaled from 20px 40px */
-            border-radius: 15px; /* scaled from 10px */
-            font-size: 36px; /* scaled from 24px */
-            font-weight: bold;
-            display: none;
-            z-index: 7;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white; 
+        padding: 30px 60px; 
+        border-radius: 15px; 
+        font-size: 36px; 
+        font-weight: bold;
+        text-shadow: 0 0 5px rgba(0,0,0,0.7); 
+        display: none;
+        z-index: 7;
+        transition: color 0.05s linear; 
+    }
+
+    body.lightning-flash-on #feeder-triggered {
+        color: black;
+        text-shadow: 0 0 3px rgba(255,255,255,0.5); 
+    }
+
   </style>
   <!-- GSAP Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" defer></script>
@@ -350,7 +402,6 @@
     <div id="feeder-triggered" style="display: none;">⚡ Feeder Triggered ⚡</div>
     
     <div id="top-left-container">
-      <span id="goat-feedings">The goats have been fed 0 times today.</span>
       <span id="spots-remaining"></span>
       <span id="sats_left">⚡0 sats to go until the herd is fed again.⚡</span>
     </div>
@@ -358,8 +409,8 @@
     <div id="qr-code">
       <img src="images/qr.png" width="180" height="180" style="border-radius: 18px;">
       <img id="lightning-img" src="images/lightning.png" width="177" height="177" style="border-radius: 18px; display: none;">
-      <div id="sats-received-overlay"></div>
     </div>
+    <div id="sats-received-overlay"></div> 
     
     <div id="content">
       <div id="bottom-container">
@@ -370,7 +421,7 @@
         <div id="center-container">
           <div id="progress-container">
             <div id="progress-fill"></div>
-            <div id="progress-text">0%</div>
+            <div id="progress-drainer"></div> 
             <div id="scrolling-comment"></div>
           </div>
         </div>
@@ -381,45 +432,58 @@
   </div>
   <script>
     (function () {
-      const RECONNECT_INTERVAL_BASE = 30000; // 30 seconds
-      const MAX_RECONNECT_INTERVAL = 60000; // 60 seconds
+      const RECONNECT_INTERVAL_BASE = 30000; 
+      const MAX_RECONNECT_INTERVAL = 60000; 
       const FETCH_INTERVAL = 16000;
-      const SATS_LEFT_DISPLAY_DURATION = 2000;
+      const SATS_LEFT_DISPLAY_DURATION = 2500; 
       const WS_URL = 'wss://lnb.bolverker.com/api/v1/ws/036ad4bb0dcb4b8c952230ab7b47ea52';
       const WS_URL_FASTAPI = 'wss://lightning-goats.com/ws/';
       const API_BASE_URL = 'https://lightning-goats.com';
       const MAX_PROCESSED_HASHES = 25;
-      const MAX_DISPLAYED_MEMBERS = 10; // Maximum number of CyberHerd members to display
+      const MAX_DISPLAYED_MEMBERS = 10; 
       
-      // JSON-based animation and UI configuration
       const animationConfig = {
         message: {
-          scrollSpeed: 200,       // Pixels per second for message scrolling
-          spacing: 30,            // Spacing between messages in pixels
-          separator: " ⚡ ", // Separator between messages
-          checkPoints: [0.8, 0.5, 0.3], // Message check points (as percentage of container width)
-          separatorColor: "#e33502" // Color of the separator
+          scrollSpeed: 200,       
+          spacing: 30,            
+          separator: " ⚡ ", 
+          checkPoints: [0.8, 0.5, 0.3], 
+          separatorColor: "#e33502" 
         },
         accordion: {
-          displayDuration: 18000, // How long accordion items stay visible (18 seconds)
-          transitionDuration: 1000, // Animation duration for accordion appearance
-          breatheAnimationDuration: 3000 // Duration of breathing animation for user profiles
+          displayDuration: 18000, 
+          transitionDuration: 1000, 
+          itemStagger: 0.1, 
+          breatheAnimationDuration: 3000 
         },
         qrCode: {
-          flashDuration: 125,    // Duration of QR code flash animation (ms)
-          displayDuration: 2000  // How long to show the lightning image (ms)
+          flashDuration: 125,    
+          displayDuration: 2000  
+        },
+        satsReceivedOverlay: {
+          entryDuration: 0.4, 
+          exitDuration: 0.3, 
         },
         feeder: {
-          effectDuration: 2000,  // Duration of feeder triggered effect (ms)
-          scalingStart: 0.8,     // Initial scale when animation starts
-          scalingEnd: 1.2        // Final scale when animation ends
+          effectDuration: 2000,  
+          scalingStart: 0.8,     
+          scalingEnd: 1.2        
         },
         lightning: {
-          flashDuration: 200,    // Duration of lightning flash (ms)
-          flashCount: 3          // Number of lightning flashes
+          flashDuration: 150,    
+          flashCount: 3          
         },
         progressBar: {
-          updateDuration: 2000   // Duration of progress bar animation (ms)
+          updateDuration: 2000,   
+          shineDuration: 750,
+          popDuration: 300, 
+          colorFlashDuration: 200, 
+          drainDuration: 800 
+        },
+        dataUpdate: {
+            highlightColor: "#ffdb58", 
+            originalColorText: "white", 
+            duration: 0.8 
         }
       };
       
@@ -431,34 +495,31 @@
       const satsLeftElem = document.getElementById('sats_left');
       const currentTimeElem = document.getElementById('current-time');
       const currentTempElem = document.getElementById('current-temperature');
-      const goatFeedingsElem = document.getElementById('goat-feedings');
       const spotsRemainingElem = document.getElementById('spots-remaining');
+      const progressContainer = document.getElementById('progress-container'); 
       const progressFill = document.getElementById('progress-fill');
-      const progressText = document.getElementById('progress-text');
+      const progressDrainer = document.getElementById('progress-drainer'); 
       const scrollingComment = document.getElementById('scrolling-comment');
       const satsReceivedOverlay = document.getElementById('sats-received-overlay');
       
-      let balance = 0; // in sats
+      let balance = 0; 
       let goal = 0;
       let lastSuccessfulGoal = 0;
       let lastSuccessfulBalance = 0;
-      let isAnimating = false;
+      // let isAnimating = false; // Replaced by isFeederAnimating
+      let isFeederAnimating = false; // New flag
       
-      // Global variables for message handling
       let messageQueue = [];
-      let activeMessages = []; // Track active messages on screen
-      let isScrolling = false;
-      let messageSpacing = animationConfig.message.spacing; // Use config value for spacing
+      let activeMessages = []; 
+      let messageSpacing = animationConfig.message.spacing; 
       let messageCheckInterval = null;
-      const MESSAGE_SEPARATOR = animationConfig.message.separator; // Use config value for separator
+      const MESSAGE_SEPARATOR = animationConfig.message.separator; 
       
-      // CyberHerd members tracking
       let cyberHerdMembers = [];
       
       let reconnectInterval = RECONNECT_INTERVAL_BASE;
       let processedPaymentHashes = new Set();
       
-      // Define goat images mapping
       const goats = {
         "Newton": { img: "images/newton.png" },
         "Nova": { img: "images/nova.png" },
@@ -487,13 +548,23 @@
           }
         };
       }
+
+      function animateTextUpdate(element, newText, highlightColor, originalColor, duration) {
+          if (element.innerText !== newText) {
+              element.innerText = newText;
+              gsap.fromTo(element, 
+                  { color: highlightColor }, 
+                  { color: originalColor, duration: duration, ease: "power1.inOut" }
+              );
+          }
+      }
       
       function formatTime(date) {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
       
       const debouncedUpdateProgressBar = debounce(updateProgressBar, 100);
-      const throttledUpdateSatsLeft = throttle(updateSatsLeft, 200);
+      const throttledUpdateSatsLeft = throttle(updateSatsLeftDisplay, 200); 
       
       async function fetchData(url, options = {}) {
         try {
@@ -511,9 +582,7 @@
         }
       }
       
-      // OPTIMIZE: Use balance/goal from WebSocket instead of separate API calls
       async function fetchGoal() {
-        // Only fetch if we don't have a valid goal from WebSocket
         if (goal <= 0) {
           try {
             const data = await fetchData(`${API_BASE_URL}/payments/trigger_amount`);
@@ -530,10 +599,7 @@
         }
       }
       
-      // OPTIMIZE: Use balance from WebSocket instead of separate API calls
-      // Keep fetchBalance as a fallback only
       async function fetchBalance() {
-        // Only fetch if we need a balance refresh (new session or potential missed WS updates)
         if (balance <= 0) {
           try {
             const data = await fetchData(`${API_BASE_URL}/payments/balance`);
@@ -549,32 +615,19 @@
             balance = lastSuccessfulBalance || 0;
           }
         }
-        updateSatsLeft();
+        updateSatsLeftDisplay(); 
       }
       
-      // Keep this as-is since it's used once at startup
-      async function fetchFeedings() {
-        try {
-          const data = await fetchData(`${API_BASE_URL}/goats/feedings`);
-          if (data && typeof data.goat_feedings === 'number') {
-            const feedings = data.goat_feedings;
-            const timeWord = (feedings === 1) ? "time" : "times";
-            goatFeedingsElem.innerText = `The ⚡Lightning Goats⚡ have been fed ${feedings} ${timeWord} today.`;
-          } else {
-            goatFeedingsElem.innerText = '';
-          }
-        } catch (error) {
-          goatFeedingsElem.innerText = '';
-        }
-      }
-      
-      // This function is only needed at startup
       async function fetchSpotsRemaining() {
         try {
           const data = await fetchData(`${API_BASE_URL}/cyberherd/spots_remaining`);
           if (data && typeof data.spots_remaining === 'number') {
             const spots = data.spots_remaining;
-            spotsRemainingElem.innerText = `CyberHerd spots left: ${spots}`;
+            animateTextUpdate(spotsRemainingElem, 
+                              `CyberHerd spots left: ${spots}`,
+                              animationConfig.dataUpdate.highlightColor,
+                              animationConfig.dataUpdate.originalColorText,
+                              animationConfig.dataUpdate.duration);
           } else {
             spotsRemainingElem.innerText = '';
           }
@@ -584,26 +637,17 @@
       }
       
       function addMessageToQueue(text, displayData = null) {
-        // Skip empty messages
         if (!text) return;
-        
-        // Add all messages to queue without duplicate checking
-        messageQueue.push({
-          text: text,
-          displayData: displayData
-        });
-        
-        // Try to display immediately
+        const cleanedText = text.replace(/https?:\/\/[^\s]+/g, '').replace(/www\.[^\s]+/g, '').trim();
+        if (!cleanedText) return;
+        messageQueue.push({ text: cleanedText, displayData: displayData });
         tryDisplayMessage();
-        
-        // Ensure the check interval is running
         if (messageCheckInterval === null) {
-          messageCheckInterval = setInterval(tryDisplayMessage, 200);
+            messageCheckInterval = setInterval(tryDisplayMessage, 200);
         }
       }
       
       function tryDisplayMessage() {
-        // If queue is empty, clean up and exit
         if (messageQueue.length === 0) {
           if (messageCheckInterval !== null && activeMessages.length === 0) {
             clearInterval(messageCheckInterval);
@@ -611,26 +655,14 @@
           }
           return;
         }
-
-        // Always show a message if there are none active
         if (activeMessages.length === 0) {
           processNextMessage();
           return;
         }
-
-        // Otherwise, check for enough space to display next message
-        const containerWidth = scrollingComment.offsetWidth;
-        
-        // Find the rightmost message edge (the one that entered most recently)
+        const progressBarTotalWidth = progressContainer.offsetWidth; 
         let newestMessage = activeMessages[activeMessages.length - 1];
-        
-        // Calculate the actual right edge position (left position + width)
         let newestMessageRightEdge = newestMessage.x + newestMessage.width;
-        
-        // Check if there's enough space from the container edge
-        // We want to make sure the newest message has moved in enough before showing the next one
-        const enteredEnough = newestMessageRightEdge <= containerWidth - messageSpacing;
-        
+        const enteredEnough = newestMessageRightEdge <= progressBarTotalWidth - messageSpacing;
         if (enteredEnough) {
           processNextMessage();
         }
@@ -638,140 +670,256 @@
       
       function processNextMessage() {
         if (messageQueue.length === 0) return;
-        
-        // Get the next message from the queue
+        if (isFeederAnimating) { // Don't start new messages if feeder sequence is active
+            return; 
+        }
+
         const messageItem = messageQueue.shift();
         const messageText = messageItem.text;
         const displayData = messageItem.displayData;
-        
-        // If this message has display data, show it in the accordion
         if (displayData) {
           displayAccordion(Array.isArray(displayData) ? displayData : [displayData]);
         }
         
-        // Create message element
-        const containerWidth = scrollingComment.offsetWidth;
+        const progressBarTotalWidth = progressContainer.offsetWidth; 
         const messageSpan = document.createElement('span');
         messageSpan.className = 'message';
-        
-        // Add separator before message text if there are already active messages
         const finalMessageText = activeMessages.length > 0 ? 
           MESSAGE_SEPARATOR + messageText : 
           messageText;
-        
         messageSpan.innerText = finalMessageText;
         
-        // Position at right edge (completely outside the container)
-        gsap.set(messageSpan, { 
-          x: containerWidth,
-          top: '50%', // Ensure it's vertically centered
-          y: '-50%'   // Account for the transform in CSS
-        });
+        gsap.set(messageSpan, { x: progressBarTotalWidth, top: '50%', y: '-50%' });
         scrollingComment.appendChild(messageSpan);
-        
-        // Hide progress text if first message
-        if (activeMessages.length === 0) {
-          isScrolling = true;
-          progressText.style.display = 'none';
-        }
-        
-        // Process layout then animate
+
         requestAnimationFrame(() => {
           const messageWidth = messageSpan.offsetWidth;
-          const totalDistance = containerWidth + messageWidth;
+          const totalDistance = progressBarTotalWidth + messageWidth; 
           const duration = totalDistance / animationConfig.message.scrollSpeed;
           
-          // Create tracking object with both left and right edge positions
           const messageTracker = {
             element: messageSpan,
             width: messageWidth,
-            x: containerWidth,
+            x: progressBarTotalWidth,
             get rightEdge() { return this.x + this.width; },
             initialTimestamp: Date.now()
           };
-          
-          // Add to active messages
           activeMessages.push(messageTracker);
-          
-          // Animate the message
+
           gsap.to(messageSpan, {
             x: -messageWidth,
             duration: duration,
             ease: "linear",
             onUpdate: function() {
-              // Update position tracker with precise value
-              messageTracker.x = parseFloat(messageSpan._gsap.x);
+              if (isFeederAnimating) return; // Message doesn't control fill during feeder animation
+
+              messageTracker.x = parseFloat(messageSpan._gsap.x); 
+              
+              const naturalProgressPercent = (goal > 0) ? Math.min(Math.max((balance / goal) * 100, 0), 100) : 0;
+              const naturalFillWidthPx = (naturalProgressPercent / 100) * progressBarTotalWidth;
+
+              let newFillWidthPx;
+
+              if (messageTracker.x < naturalFillWidthPx) {
+                newFillWidthPx = Math.max(0, messageTracker.x);
+              } else {
+                newFillWidthPx = naturalFillWidthPx;
+              }
+              
+              newFillWidthPx = Math.min(newFillWidthPx, progressBarTotalWidth);
+
+              gsap.to(progressFill, { width: newFillWidthPx + 'px', duration: 0.05, ease: 'none' });
+
+              const shouldBeFilling = newFillWidthPx > 0 && newFillWidthPx < progressBarTotalWidth;
+              if (shouldBeFilling) {
+                if (!progressFill.classList.contains('is-filling')) {
+                    progressFill.classList.add('is-filling');
+                }
+              } else {
+                if (progressFill.classList.contains('is-filling')) {
+                    progressFill.classList.remove('is-filling');
+                }
+              }
             },
             onComplete: () => {
-              // Clean up message
               const index = activeMessages.findIndex(m => m.element === messageSpan);
-              if (index !== -1) {
-                activeMessages.splice(index, 1);
-              }
+              if (index !== -1) activeMessages.splice(index, 1);
               
               if (scrollingComment.contains(messageSpan)) {
                 scrollingComment.removeChild(messageSpan);
               }
               
-              // Show progress text if no messages left
-              if (activeMessages.length === 0) {
-                isScrolling = false;
-                progressText.style.display = 'flex';
+              if (!isFeederAnimating && activeMessages.length === 0) {
+                updateProgressBar(); 
               }
-              
-              // Try to display another message
-              tryDisplayMessage();
+              tryDisplayMessage(); 
             }
           });
         });
       }
       
-      function updateSatsLeft(receivedAmount = 0, isNewPayment = false) {
-        if (isNewPayment) {
-          displayReceivedAmount(receivedAmount);
+      function updateSatsLeftDisplay(receivedAmount = 0, isNewPayment = false) {
+        if (isNewPayment && receivedAmount > 0) {
+          displayReceivedAmount(receivedAmount); 
         } else {
           const currentGoal = typeof goal === 'number' ? goal : 0;
           const currentBalance = typeof balance === 'number' ? balance : 0;
           const satsLeft = Math.max(currentGoal - currentBalance, 0);
-          satsLeftElem.innerText = `⚡${satsLeft} sats to go until the herd is fed again.⚡`;
+          animateTextUpdate(satsLeftElem, 
+                            `⚡${satsLeft} sats to go until the herd is fed again.⚡`,
+                            animationConfig.dataUpdate.highlightColor,
+                            animationConfig.dataUpdate.originalColorText,
+                            animationConfig.dataUpdate.duration);
         }
         debouncedUpdateProgressBar();
       }
       
       function displayReceivedAmount(receivedAmount) {
         if (receivedAmount > 0) {
-          const overlayText = `${Math.round(receivedAmount)} sats received`;
+          const overlayText = `⚡ ${Math.round(receivedAmount)} sats ⚡`;
           satsReceivedOverlay.innerText = overlayText;
-          gsap.to(satsReceivedOverlay, { 
-            duration: animationConfig.qrCode.flashDuration / 1000, 
-            opacity: 1 
-          });
+          
+          gsap.fromTo(satsReceivedOverlay, 
+            { opacity: 0, y: 20 }, 
+            { 
+              opacity: 1, 
+              y: 0, 
+              duration: animationConfig.satsReceivedOverlay.entryDuration,
+              ease: "power2.out"
+            }
+          );
+
           setTimeout(() => {
-            gsap.to(satsReceivedOverlay, { duration: 0.5, opacity: 0 });
-            updateSatsLeft();
-          }, SATS_LEFT_DISPLAY_DURATION);
+            gsap.to(satsReceivedOverlay, { 
+              opacity: 0, 
+              y: -10, 
+              duration: animationConfig.satsReceivedOverlay.exitDuration, 
+              ease: "power2.in",
+              onComplete: () => {
+                updateSatsLeftDisplay(); 
+              }
+            });
+          }, SATS_LEFT_DISPLAY_DURATION - (animationConfig.satsReceivedOverlay.exitDuration * 1000));
         } else {
-          updateSatsLeft();
+          updateSatsLeftDisplay();
         }
       }
       
-      function updateProgressBar() {
-        if (goal === 0) return;
-        const progress = Math.min(Math.max((balance / goal) * 100, 0), 100);
-        gsap.to(progressFill, { 
-          width: `${progress}%`, 
-          duration: animationConfig.progressBar.updateDuration / 1000 // Convert ms to seconds for GSAP
+    function updateProgressBar() {
+        if (isFeederAnimating) { 
+            return;
+        }
+
+        const currentProgressVal = (goal > 0) ? (balance / goal) * 100 : 0;
+        if (activeMessages.length > 0 && currentProgressVal < 100) { // If messages active AND not 100% yet
+            return; 
+        }
+
+        if (goal === 0) {
+            gsap.to(progressFill, { width: '0%', duration: animationConfig.progressBar.updateDuration / 1000 });
+            progressFill.classList.remove('is-filling');
+            progressFill.classList.remove('shine-effect'); 
+            return;
+        }
+
+        const progress = Math.min(Math.max(currentProgressVal, 0), 100);
+
+        if (progress < 100) { // Regular progress update
+            gsap.to(progressFill, { 
+                width: `${progress}%`, 
+                duration: animationConfig.progressBar.updateDuration / 1000 
+            });
+
+            if (progress > 0) {
+                if (!progressFill.classList.contains('is-filling')) {
+                    progressFill.classList.add('is-filling');
+                }
+            } else {
+                if (progressFill.classList.contains('is-filling')) {
+                    progressFill.classList.remove('is-filling');
+                }
+            }
+            progressFill.classList.remove('shine-effect');
+        } else if (progress >= 100 && !isFeederAnimating) { // Goal reached!
+            isFeederAnimating = true; 
+            
+            gsap.killTweensOf(progressFill, "width"); // Stop any message-driven width tweens
+
+            gsap.to(progressFill, { width: '100%', duration: 0.2, onComplete: () => {
+                const tl = gsap.timeline();
+                tl.to(progressContainer, { 
+                    scale: 1.05, 
+                    duration: animationConfig.progressBar.popDuration / 2000, 
+                    yoyo: true, 
+                    repeat: 1, 
+                    ease: "power1.inOut"
+                })
+                .to(progressFill, { 
+                    backgroundColor: "#76FF03", 
+                    duration: animationConfig.progressBar.colorFlashDuration / 2000, 
+                    yoyo: true,
+                    repeat: 1,
+                    ease: "power1.inOut"
+                }, "-=0.1") 
+                .add(() => { 
+                    progressFill.classList.remove('is-filling');
+                    progressFill.classList.add('shine-effect');
+                })
+                .add(() => { 
+                    triggerLightningEffect();
+                    triggerFeederEffect(); 
+                }, `+=${(animationConfig.progressBar.shineDuration / 1000) - 0.1}`);
+            }});
+        }
+    }
+
+    function triggerFeederEffect() { // No changes here
+        feederTriggeredText.style.display = 'block'; 
+        gsap.fromTo(feederTriggeredText,
+          { opacity: 0, scale: animationConfig.feeder.scalingStart },
+          { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
+        
+        gsap.to(feederTriggeredText, {
+          opacity: 0,
+          scale: animationConfig.feeder.scalingEnd,
+          duration: 0.5,
+          delay: animationConfig.feeder.effectDuration / 1000 - 0.5, 
+          ease: 'back.in(1.7)',
+          onComplete: () => {
+            feederTriggeredText.style.display = 'none'; 
+            resetProgressBar(); 
+          }
         });
-        if (!isScrolling) {
-          progressText.innerText = `${Math.round(progress)}%`;
-        }
-        if (progress >= 100 && !isAnimating) {
-          triggerLightningEffect();
-          triggerFeederEffect();
-          isAnimating = true;
-          setTimeout(() => { fetchFeedings(); }, 1000);
-        }
-      }
+    }
+
+    function resetProgressBar() { // Modified to reset flag and re-evaluate messages
+        balance = 0; 
+        // updateSatsLeftDisplay(); // Called at the end of the timeline now
+
+        gsap.set(progressDrainer, { display: 'block', width: '0%', right: '0', left: 'auto' });
+        
+        const tl = gsap.timeline({
+            onComplete: () => {
+                gsap.set(progressDrainer, { display: 'none' });
+                isFeederAnimating = false; // Reset the flag here
+                updateSatsLeftDisplay();   // Update display and potentially progress bar
+                tryDisplayMessage();       // Allow messages to check if they can start
+            }
+        });
+
+        tl.to(progressDrainer, { 
+            width: '100%', 
+            duration: animationConfig.progressBar.drainDuration / 1000,
+            ease: "power1.inOut"
+        })
+        .to(progressFill, { 
+            width: `0%`, 
+            duration: animationConfig.progressBar.drainDuration / 1000 
+        }, 0); 
+
+        progressFill.classList.remove('is-filling');
+        progressFill.classList.remove('shine-effect');
+    }
       
       function addProcessedPaymentHash(hash) {
         if (processedPaymentHashes.size >= MAX_PROCESSED_HASHES) {
@@ -801,12 +949,11 @@
               balance = walletBalanceSats;
               lastSuccessfulBalance = balance;
               if (receivedAmount > 0) {
-                throttledUpdateSatsLeft(receivedAmount, true);
+                throttledUpdateSatsLeft(receivedAmount, true); 
                 toggleQRCodeImage();
-              } else if (receivedAmount < 0) {
+              } else if (receivedAmount < 0) { 
                 throttledUpdateSatsLeft();
               }
-              setTimeout(() => { fetchFeedings(); }, 1000);
             }
             if (data.message) {
               addMessageToQueue(data.message);
@@ -835,402 +982,152 @@
         };
       }
       
-      // Utility function to clean message text - remove newlines and URLs
       function cleanMessageText(text) {
         if (!text) return '';
-        
-        // Remove all newlines and carriage returns
         let cleaned = text.replace(/[\r\n]+/g, ' ');
-        
-        // Remove URLs (http, https, www)
         cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, '');
         cleaned = cleaned.replace(/www\.[^\s]+/g, '');
-        
-        // Normalize spaces (remove consecutive spaces)
         cleaned = cleaned.replace(/\s+/g, ' ').trim();
-        
         return cleaned;
       }
 
       function handleFastAPIWebSocketMessage(data) {
         try {
-          // Attempt to parse as JSON
-          const jsonData = JSON.parse(data);
-          
-          // Single consolidated log for all JSON messages
-          console.log(`WebSocket [${jsonData.type || 'unknown'}]:`, jsonData);
-          
-          // Handle structured JSON message
-          if (jsonData.type && jsonData.message) {
-            // Skip displaying connection_established messages
-            if (jsonData.type === "connection_established") {
-              return;
+            if (data.trim().startsWith('{') && data.trim().endsWith('}')) {
+            const jsonData = JSON.parse(data);
+            if (jsonData.type === "connection_established") return;
+            if (jsonData.type === "cyber_herd") {
+                fetchSpotsRemaining(); 
+                if(jsonData.members && Array.isArray(jsonData.members)) {
+                    displayCyberHerdMembers(jsonData.members, jsonData.newest_pubkey || null);
+                }
             }
-            
             const messageText = jsonData.message;
             const cleanedMessage = cleanMessageText(messageText);
-            
-            // Handle each message type differently
-            switch (jsonData.type) {
-              case "cyberherd_user":
-                // OPTIMIZE: Use spots directly from message instead of API call
-                // Update spots remaining directly from message data
-                if (jsonData.data && jsonData.data.spots_remaining !== undefined) {
-                  const spots = jsonData.data.spots_remaining;
-                  spotsRemainingElem.innerText = `CyberHerd spots left: ${spots}`;
-                }
-                
-                // Process all_members array if available (new format from backend)
-                if (jsonData.data && jsonData.data.all_members && Array.isArray(jsonData.data.all_members)) {
-                  // Use the full list of members directly from the server
-                  cyberHerdMembers = jsonData.data.all_members;
-                  
-                  // Find the newest member if marked
-                  const newestPubkey = cyberHerdMembers.find(m => m.is_newest)?.pubkey || 
-                                       (jsonData.data.pubkey || null);
-                  
-                  // Display all members with newest highlighted
-                  displayCyberHerdMembers(cyberHerdMembers, newestPubkey);
-                }
-                // Fallback to single user data if all_members not available
-                else if (jsonData.data && jsonData.data.picture) {
-                  let userData = {
-                    imageUrl: jsonData.data.picture,
-                    name: jsonData.data.display_name || "Anon",
-                    isUser: true,
-                    kinds: jsonData.data.kinds || "",
-                    pubkey: jsonData.data.pubkey || "",
-                    amount: jsonData.data.amount || 0,
-                    timestamp: Date.now() // Add timestamp for sorting
-                  };
-                  
-                  // Add to cyberherd members (with deduplication by pubkey)
-                  const pubkey = userData.pubkey;
-                  const existingIndex = cyberHerdMembers.findIndex(member => member.pubkey === pubkey);
-                  
-                  if (existingIndex >= 0) {
-                    // Update existing member with new data but preserve their original timestamp
-                    const originalTimestamp = cyberHerdMembers[existingIndex].timestamp;
-                    cyberHerdMembers[existingIndex] = { ...userData, timestamp: originalTimestamp };
-                  } else {
-                    // Add as new member
-                    cyberHerdMembers.unshift(userData); // Add to the beginning of the array
-                  }
-                  
-                  // Only keep the most recent members (sorted by timestamp)
-                  if (cyberHerdMembers.length > MAX_DISPLAYED_MEMBERS * 2) {
-                    cyberHerdMembers = cyberHerdMembers
-                      .sort((a, b) => b.timestamp - a.timestamp) // Sort by newest first
-                      .slice(0, MAX_DISPLAYED_MEMBERS); // Keep only the top entries
-                  }
-                  
-                  // Show all cyberherd members in accordion, with newest highlighted
-                  displayCyberHerdMembers(cyberHerdMembers, pubkey);
-                }
-                
-                // Display the cleaned message in the scrolling area
-                addMessageToQueue(cleanedMessage);
-                break;
-                
-              case "payment_event":
-              case "feeder_event":
-                // OPTIMIZE: Extract and use balance and goal data
-                if (jsonData.data) {
-                  // Update balance if provided
-                  if (jsonData.data.balance !== undefined && jsonData.data.balance !== null) {
-                    balance = jsonData.data.balance;
-                    lastSuccessfulBalance = balance;
-                  }
-                  
-                  // Update difference/goal data if provided
-                  if (jsonData.data.difference !== undefined && jsonData.data.difference !== null) {
-                    // Directly update the sats left display with the provided difference
-                    satsLeftElem.innerText = `⚡${jsonData.data.difference} sats to go until the herd is fed again.⚡`;
-                    
-                    // If we have a balance, we can calculate the goal more accurately
-                    if (balance > 0) {
-                      goal = balance + jsonData.data.difference;
-                      lastSuccessfulGoal = goal;
-                    }
-                  }
-                  
-                  // Update the progress bar based on the new values
-                  debouncedUpdateProgressBar();
-                  
-                  // Update goat feedings count if included in feeder event
-                  if (jsonData.type === "feeder_event" && jsonData.data.goat_feedings !== undefined) {
-                    const feedings = jsonData.data.goat_feedings;
-                    const timeWord = (feedings === 1) ? "time" : "times";
-                    goatFeedingsElem.innerText = `The ⚡Lightning Goats⚡ have been fed ${feedings} ${timeWord} today.`;
-                  }
-                }
-                
-                // Prepare goat data if available, but don't display yet
-                let goatItems = null;
-                if (jsonData.data && jsonData.data.goats && Array.isArray(jsonData.data.goats)) {
-                  goatItems = jsonData.data.goats.map(goat => ({
-                    imageUrl: goats[goat.name]?.img,
-                    name: goat.name,
-                    isUser: false
-                  })).filter(item => item.imageUrl); // Filter out goats with missing images
-                }
-                
-                // Add the cleaned message to queue with the goat data attached
-                addMessageToQueue(cleanedMessage, goatItems);
-                break;
-                
-              // OPTIMIZE: Handle info_message with system stats
-              case "info_message":
-                // Check if this is a system stats message
-                if (jsonData.data && jsonData.data.systemStats) {
-                  if (jsonData.data.systemStats.temperature !== undefined) {
-                    const temperature = Math.round(jsonData.data.systemStats.temperature);
-                    currentTempElem.innerText = `${temperature} °F`;
-                  }
-                }
-                
-                // For any message type, display in scrolling area
-                addMessageToQueue(messageText);
-                break;
-                
-              case "cyberherd_treats":
-              case "legacy":
-              default:
-                // For any message type, display in scrolling area
-                addMessageToQueue(messageText);
+            addMessageToQueue(cleanedMessage);
+            } else {
+            const cleanedMessage = cleanMessageText(data);
+            if (cleanedMessage) addMessageToQueue(cleanedMessage);
             }
-          } else {
-            // Fallback for JSON objects without type/message format
-            console.log("Received JSON without type/message structure:", jsonData);
-          }
         } catch (e) {
-          // Not JSON, directly add as a message without checking for duplicates
-          console.log("WebSocket [non-JSON]:", data, e);
-          addMessageToQueue(data);
+            const cleanedMessage = cleanMessageText(data);
+            if (cleanedMessage) addMessageToQueue(cleanedMessage);
         }
       }
       
-      // Image cache implementation
       class ImageCache {
         constructor(cacheName = 'lg-image-cache-v1') {
           this.cacheName = cacheName;
           this.cacheSupported = 'caches' in window;
-          this.loadedImages = new Set(); // Track already loaded images
+          this.loadedImages = new Set(); 
         }
-        
         async initCache() {
           if (!this.cacheSupported) return false;
           try {
-            // Open or create the cache
             this.cache = await caches.open(this.cacheName);
             return true;
-          } catch (error) {
-            console.error('Error initializing cache:', error);
-            return false;
-          }
+          } catch (error) { return false; }
         }
-        
         async preloadImages(imageUrls) {
           if (!this.cacheSupported || !this.cache) return;
-          
-          console.log('Preloading images:', imageUrls);
           const cachePromises = imageUrls.map(url => this.cacheImage(url, true));
-          
-          try {
-            await Promise.allSettled(cachePromises);
-            console.log('Image preloading complete');
-          } catch (error) {
-            console.error('Error preloading images:', error);
-          }
+          try { await Promise.allSettled(cachePromises); } catch (error) {}
         }
-        
         async cacheImage(url, silent = false) {
           if (!this.cacheSupported || !this.cache || !url) return url;
           if (this.loadedImages.has(url)) return url;
-          
           try {
-            // Check if already in cache
             const cacheResponse = await this.cache.match(url);
-            if (cacheResponse) {
-              this.loadedImages.add(url);
-              return url;
-            }
-            
-            // Fetch and cache the image
+            if (cacheResponse) { this.loadedImages.add(url); return url; }
             const fetchResponse = await fetch(url, { mode: 'no-cors', cache: 'no-cache' });
             if (fetchResponse && fetchResponse.status === 200) {
               await this.cache.put(url, fetchResponse.clone());
               this.loadedImages.add(url);
-              if (!silent) console.log('Cached image:', url);
             }
             return url;
-          } catch (error) {
-            if (!silent) console.error('Error caching image:', url, error);
-            return url;
-          }
+          } catch (error) { return url; }
         }
-        
         async getImage(url) {
           if (!this.cacheSupported || !this.cache || !url) return url;
-          
           try {
-            // Try to get from cache first
             const cachedResponse = await this.cache.match(url);
-            if (cachedResponse) {
-              this.loadedImages.add(url);
-              return url;
-            }
-            
-            // If not in cache, cache it for next time
+            if (cachedResponse) { this.loadedImages.add(url); return url; }
             await this.cacheImage(url);
             return url;
-          } catch (error) {
-            console.error('Error retrieving image from cache:', url, error);
-            return url;
-          }
+          } catch (error) { return url; }
         }
-        
-        // Clean up old cached images (call periodically if needed)
         async cleanCache(maxAgeDays = 7) {
           if (!this.cacheSupported) return;
-          
           try {
             const cache = await caches.open(this.cacheName);
             const cachedRequests = await cache.keys();
             const now = Date.now();
             const maxAge = maxAgeDays * 24 * 60 * 60 * 1000;
-            
             for (const request of cachedRequests) {
               const response = await cache.match(request);
               if (response) {
                 const dateHeader = response.headers.get('date');
                 if (dateHeader) {
                   const cacheDate = new Date(dateHeader).getTime();
-                  if (now - cacheDate > maxAge) {
-                    await cache.delete(request);
-                    console.log('Removed old cached image:', request.url);
-                  }
+                  if (now - cacheDate > maxAge) await cache.delete(request);
                 }
               }
             }
-          } catch (error) {
-            console.error('Error cleaning cache:', error);
-          }
+          } catch (error) {}
         }
       }
-      
-      // Create global image cache instance
       const imageCache = new ImageCache();
       
-      // Collection of all images that should be preloaded
       function getPreloadImageUrls() {
         const urls = [];
-        
-        // Add goat images
-        Object.values(goats).forEach(goat => {
-          if (goat.img) urls.push(goat.img);
-        });
-        
-        // Add static UI images
-        urls.push('images/qr.png');
-        urls.push('images/lightning.png');
-        urls.push('images/lightninggoatslogo1.png'); // Fallback image
-        
+        Object.values(goats).forEach(goat => { if (goat.img) urls.push(goat.img); });
+        urls.push('images/qr.png', 'images/lightning.png', 'images/lightninggoatslogo1.png');
         return urls.filter(Boolean);
       }
       
-      // Modified image loading for user profile images
       function createCachedImage(url, alt, title, options = {}) {
         const img = document.createElement('img');
-        
-        // Handle cached loading
         if (url && imageCache.cacheSupported) {
-          // Set a placeholder or loading state
-          if (options.placeholder) {
-            img.src = options.placeholder;
-          }
-          
-          // Try to load from cache
-          imageCache.getImage(url).then(cachedUrl => {
-            img.src = cachedUrl;
-          }).catch(() => {
-            // Fallback if cache fails
-            img.src = url;
-          });
-        } else {
-          // Direct loading if caching not supported
-          img.src = url;
-        }
-        
-        // Set other attributes
+          if (options.placeholder) img.src = options.placeholder;
+          imageCache.getImage(url).then(cachedUrl => { img.src = cachedUrl; })
+                          .catch(() => { img.src = url; });
+        } else { img.src = url; }
         if (alt) img.alt = alt;
         if (title) img.title = title;
-        
-        // Setup error handling
-        img.onerror = () => {
-          img.src = options.fallback || "images/lightninggoatslogo1.png";
-          console.log("Image failed to load, using placeholder");
-        };
-        
+        img.onerror = () => { img.src = options.fallback || "images/lightninggoatslogo1.png"; };
         return img;
       }
       
-      // Modified displayAccordion to use cached images
       function displayAccordion(items) {
-        // Check if these are user items - if so, we've already handled them
-        if (items.length > 0 && items[0].isUser) {
-          // If these are for cyberherd users, we've already created the display
-          // from the displayCyberHerdMembers function
-          return true;
-        }
+        if (items.length > 0 && items[0].isUser) return true; 
         
-        // Continue with normal display for goat images and other non-user items
         const accordionContainer = document.getElementById('accordion-container');
-        accordionContainer.innerHTML = ""; // Clear previous content
-        
+        accordionContainer.innerHTML = ""; 
         if (!items || items.length === 0) return false;
         
         items.forEach(item => {
           if (!item.imageUrl) return;
-          
           const div = document.createElement('div');
           div.className = 'accordion-item';
           const content = document.createElement('div');
           content.className = 'accordion-content';
-          
-          // Create the profile container
           const profileContainer = document.createElement('div');
           profileContainer.className = 'user-profile-container';
-          
-          // Regular goat image with caching
-          const img = createCachedImage(
-            item.imageUrl, 
-            item.name, 
-            item.name
-          );
+          const img = createCachedImage(item.imageUrl, item.name, item.name);
           profileContainer.appendChild(img);
-          
-          // Add text container for name
           const textContainer = document.createElement('div');
           textContainer.className = 'user-profile-text';
-          
-          // Add name
           const nameElement = document.createElement('span');
           nameElement.className = 'user-profile-name';
           nameElement.innerText = item.name || "Goat";
           textContainer.appendChild(nameElement);
-          
           profileContainer.appendChild(textContainer);
           content.appendChild(profileContainer);
-          
           div.appendChild(content);
           accordionContainer.appendChild(div);
-          gsap.to(content, { opacity: 1, duration: animationConfig.accordion.transitionDuration / 1000 });
         });
         
-        // Use the shared function to show the accordion
-        showAccordionContainer();
-        
+        showAccordionContainer(true); 
         return true;
       }
       
@@ -1276,111 +1173,77 @@
         } catch (error) {}
       }
       
-      function triggerLightningEffect() {
+      function triggerLightningEffect() { // No changes here
         const lightningEffect = document.getElementById('lightning-effect');
+        const bodyEl = document.body;
+
         lightningEffect.style.display = 'block';
-        
+        bodyEl.classList.remove('lightning-flash-on'); 
+
         let flashCount = 0;
         const flash = () => {
-          if (flashCount >= animationConfig.lightning.flashCount) {
-            lightningEffect.style.display = 'none';
-            return;
-          }
-          
-          gsap.to(lightningEffect, {
-            opacity: 1,
-            duration: animationConfig.lightning.flashDuration / 2000,
-            onComplete: () => {
-              gsap.to(lightningEffect, {
-                opacity: 0,
-                duration: animationConfig.lightning.flashDuration / 2000,
-                onComplete: () => {
-                  flashCount++;
-                  flash();
-                }
-              });
+            if (flashCount >= animationConfig.lightning.flashCount) {
+                lightningEffect.style.display = 'none';
+                bodyEl.classList.remove('lightning-flash-on'); 
+                return;
             }
-          });
+            bodyEl.classList.add('lightning-flash-on');
+            gsap.to(lightningEffect, {
+                opacity: 1,
+                duration: animationConfig.lightning.flashDuration / 2000, 
+                onComplete: () => {
+                    bodyEl.classList.remove('lightning-flash-on');
+                    gsap.to(lightningEffect, {
+                        opacity: 0,
+                        duration: animationConfig.lightning.flashDuration / 2000, 
+                        onComplete: () => {
+                            flashCount++;
+                            flash();
+                        }
+                    });
+                }
+            });
         };
         flash();
       }
       
-      function triggerFeederEffect() {
-        feederTriggeredText.style.display = 'block';
-        gsap.fromTo(feederTriggeredText,
-          { opacity: 0, scale: animationConfig.feeder.scalingStart },
-          { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
-        gsap.to(feederTriggeredText, {
-          opacity: 0,
-          scale: animationConfig.feeder.scalingEnd,
-          duration: 0.5,
-          delay: animationConfig.feeder.effectDuration / 1000,
-          ease: 'back.in(1.7)',
-          onComplete: () => {
-            feederTriggeredText.style.display = 'none';
-            isAnimating = false;
-          }
-        });
-      }
-      
       document.addEventListener('DOMContentLoaded', async function () {
         try {
-          // Initialize image cache first
           await imageCache.initCache();
-          
-          // Start preloading images in background
           imageCache.preloadImages(getPreloadImageUrls());
           
-          // Set initial/fallback values for display elements
-          updateCurrentTime(); // Set initial time
+          updateCurrentTime(); 
           satsLeftElem.innerText = `⚡Loading...⚡`;
-          goatFeedingsElem.innerText = `The ⚡Lightning Goats⚡ have been fed today.`;
           currentTempElem.innerText = `-- °F`;
           spotsRemainingElem.innerText = `CyberHerd spots left: --`;
-          progressText.innerText = `0%`;
           
-          // Initialize WebSockets first for faster real-time data
           initWebSocket();
           initWebSocketFastAPI();
           
-          // Fetch initial data in parallel
           const fetchPromises = [
             fetchGoal(),
             fetchBalance(),
-            fetchFeedings(),
             fetchSpotsRemaining(),
             fetchTemperature()
           ];
-          
-          // Wait for all fetches to complete but proceed even if some fail
           await Promise.allSettled(fetchPromises);
           
-          // Update the display with fetched data
-          updateSatsLeft();
-          updateProgressBar();
+          updateSatsLeftDisplay();
           
-          // Set up recurring updates
           setInterval(fetchTemperature, FETCH_INTERVAL);
           setInterval(updateCurrentTime, 1000);
-          
-          // Set up cache cleaning - once a week
-          setTimeout(() => {
-            imageCache.cleanCache(7);
-          }, 60000); // Clean cache after 1 minute of page load
+          setTimeout(() => { imageCache.cleanCache(7); }, 60000); 
           
         } catch (error) {
-          console.error("Error during initialization:", error);
-          // Still try to display something useful
           updateCurrentTime();
           satsLeftElem.innerText = `⚡Connect to see sats progress⚡`;
         }
       });
 
-      // Add the CSS style for message separator
       const styleSheet = document.createElement("style");
       styleSheet.textContent = `
         #scrolling-comment .message-separator {
-          color: #e33502;
+          color: ${animationConfig.message.separatorColor};
           font-weight: bold;
           margin: 0 10px;
           display: inline-block;
@@ -1388,52 +1251,29 @@
       `;
       document.head.appendChild(styleSheet);
       
-      // Helper function to format kinds for display
       function formatKinds(kinds) {
         if (!kinds) return "";
-        
-        // If kinds is a string (comma-separated list), convert to array
         let kindsArray = kinds;
         if (typeof kinds === 'string') {
           kindsArray = kinds.split(',').map(k => k.trim()).filter(k => k);
         }
-        
-        // Convert kinds to readable labels with icons
-        const kindLabels = {
-          '6': '↻ Repost',     // Unicode circular arrow
-          '7': '❤️ Reaction',   // Unicode heart
-          '9734': '⚡ Zap'      // Unicode lightning bolt
-        };
-        
-        // Format each kind with its label if available
+        const kindLabels = { '6': '↻ Repost', '7': '❤️ Reaction', '9734': '⚡ Zap' };
         return Array.from(new Set(kindsArray)).map(kind => {
           const kindNum = String(kind).trim();
           return kindLabels[kindNum] || `Kind ${kindNum}`;
         }).join(' • ');
       }
       
-      // Display CyberHerd members
       function displayCyberHerdMembers(members, newestPubkey = null) {
         if (!members || !Array.isArray(members) || members.length === 0) return false;
         
-        // Get the accordion container
         const accordionContainer = document.getElementById('accordion-container');
-        accordionContainer.innerHTML = ""; // Clear existing content
+        accordionContainer.innerHTML = ""; 
         
-        // Sort members by timestamp if available, or keep original order
-        const sortedMembers = members.sort((a, b) => {
-          // If timestamps are available, use them
-          if (a.timestamp && b.timestamp) return b.timestamp - a.timestamp;
-          // Otherwise use current positions in the array
-          return 0;
-        });
-        
-        // Limit to MAX_DISPLAYED_MEMBERS
+        const sortedMembers = members.sort((a, b) => (a.timestamp && b.timestamp) ? b.timestamp - a.timestamp : 0);
         const displayMembers = sortedMembers.slice(0, MAX_DISPLAYED_MEMBERS);
         
-        // Create the accordion items for each member
         displayMembers.forEach(member => {
-          // Extract all needed properties with fallbacks
           const pubkey = member.pubkey || "";
           const imageUrl = member.picture || member.imageUrl || "";
           const name = member.display_name || member.name || "Anon";
@@ -1441,103 +1281,79 @@
           const amount = member.amount || 0;
           const isNewest = newestPubkey ? pubkey === newestPubkey : member.is_newest;
           
-          // Skip if no image URL (shouldn't happen but just in case)
           if (!imageUrl) return;
           
-          // Create the accordion item element
           const div = document.createElement('div');
           div.className = 'accordion-item user-profile';
-          
-          // Create the content container
           const content = document.createElement('div');
           content.className = 'accordion-content user-profile';
-          
-          // Create the image with proper caching
-          const img = createCachedImage(
-            imageUrl,
-            name,
-            name,
-            { fallback: "images/lightninggoatslogo1.png" }
-          );
-          
-          // Create the profile container
+          const img = createCachedImage(imageUrl, name, name, { fallback: "images/lightninggoatslogo1.png" });
           const profileContainer = document.createElement('div');
           profileContainer.className = 'user-profile-container';
           profileContainer.appendChild(img);
-          
-          // Add text container for name and kinds
           const textContainer = document.createElement('div');
           textContainer.className = 'user-profile-text';
-          
-          // Add name
           const nameElement = document.createElement('span');
           nameElement.className = 'user-profile-name';
           nameElement.innerText = name;
           textContainer.appendChild(nameElement);
-          
-          // Add kinds if available
           if (kinds) {
             const kindsElement = document.createElement('span');
             kindsElement.className = 'user-profile-kinds';
             kindsElement.innerText = formatKinds(kinds); 
             textContainer.appendChild(kindsElement);
           }
-          
-          // Add zap amount if available
           if (amount > 0) {
             const zapElement = document.createElement('span');
             zapElement.className = 'user-profile-zap';
             zapElement.innerText = `⚡ ${amount} sats`;
             textContainer.appendChild(zapElement);
           }
-          
           profileContainer.appendChild(textContainer);
           content.appendChild(profileContainer);
-          
-          // Highlight newest member with a subtle effect
           if (isNewest) {
             content.style.border = "2px solid #ffdb58";
-            // Add a data attribute for potential additional styling
             div.dataset.newest = "true";
           }
-          
           div.appendChild(content);
           accordionContainer.appendChild(div);
-          gsap.to(content, { opacity: 1, duration: animationConfig.accordion.transitionDuration / 1000 });
         });
         
-        // Show the accordion container
-        showAccordionContainer();
-        
+        showAccordionContainer(true); 
         return true;
       }
       
-      // Add missing function to show accordion container
-      function showAccordionContainer() {
+      function showAccordionContainer(staggerItems = false) {
         const accordionContainer = document.getElementById('accordion-container');
+        if (accordionTimeout) clearTimeout(accordionTimeout);
         
-        // Clear any existing timeout that might hide the accordion
-        if (accordionTimeout) {
-          clearTimeout(accordionTimeout);
-          accordionTimeout = null;
-        }
-        
-        // Show and animate the accordion container
         accordionContainer.style.display = 'flex';
         gsap.to(accordionContainer, {
           opacity: 1,
-          x: 0, // Animate from left (x) instead of top (y)
-          duration: animationConfig.accordion.transitionDuration / 1000
+          x: 0, 
+          duration: animationConfig.accordion.transitionDuration / 1000,
+          onComplete: () => {
+            if (staggerItems) {
+                gsap.to(".accordion-item", {
+                    opacity: 1,
+                    duration: 0.5, 
+                    stagger: animationConfig.accordion.itemStagger,
+                    ease: "power1.out"
+                });
+            } else {
+                gsap.set(".accordion-item", { opacity: 1 });
+            }
+          }
         });
         
-        // Set a timeout to hide the accordion after the display duration
         accordionTimeout = setTimeout(() => {
           gsap.to(accordionContainer, {
             opacity: 0,
-            x: -100, // Move back to left when hiding
+            x: -100, 
             duration: animationConfig.accordion.transitionDuration / 1000,
             onComplete: () => {
               accordionContainer.style.display = 'none';
+              gsap.set(".accordion-item", { opacity: 0 });
             }
           });
         }, animationConfig.accordion.displayDuration);
